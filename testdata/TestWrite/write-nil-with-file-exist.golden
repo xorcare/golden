@@ -1,0 +1,10 @@
+{
+	"errs": [
+		"golden: test dir is a file: testdata/TestWrite"
+	],
+	"logs": [
+		"golden: start write to file: testdata/TestWrite/write-nil-with-file-exist.golden",
+		"golden: nil value will not be written",
+		"golden: current test bytes file will be deleted"
+	]
+}

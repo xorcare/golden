@@ -1,0 +1,11 @@
+{
+	"Test": null,
+	"Dir": "testdata",
+	"FileMode": 420,
+	"Index": 0,
+	"InpExt": "input",
+	"ModeDir": 493,
+	"OutExt": "golden",
+	"Target": 1,
+	"UpdateFlag": null
+}

@@ -1,0 +1,6 @@
+{
+	"logs": [
+		"golden: start write to file: testdata/TestWrite/write-nil.golden",
+		"golden: nil value will not be written"
+	]
+}

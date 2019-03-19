@@ -1,0 +1,5 @@
+{
+	"logs": [
+		"golden: read the value of nil since it is not found file: testdata/TestAssert/success-assert-nil-with-error-not-exist.golden"
+	]
+}
