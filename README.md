@@ -1,5 +1,10 @@
 # Golden
 
+[![Build Status](https://travis-ci.org/xorcare/golden.svg?branch=master)](https://travis-ci.org/xorcare/golden)
+[![codecov](https://codecov.io/gh/xorcare/golden/badge.svg)](https://codecov.io/gh/xorcare/golden)
+[![Go Report Card](https://goreportcard.com/badge/github.com/xorcare/golden)](https://goreportcard.com/report/github.com/xorcare/golden)
+[![GoDoc](https://godoc.org/github.com/xorcare/golden?status.svg)](https://godoc.org/github.com/xorcare/golden)
+
 Package golden testing with golden files in Go. A golden file is the expected
 output of test, stored as a separate file rather than as a string literal inside
 the test code. So when the test is executed, it will read data from the file and
