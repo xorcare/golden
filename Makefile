@@ -1,22 +1,40 @@
-GOPATH ?= $(HOME)/go
-GOBIN = $(GOPATH)/bin
+# Based on https://git.io/fjkGc
 
-PACKAGE = golden
-NAMESPACE = github.com/xorcare/$(PACKAGE)
+# Define GOPATH in case it is not installed,
+# it is necessary to install auxiliary tools.
+GOPATH ?= $(HOME)/go
+GOPATH_BIN = $(GOPATH)/bin
+
+# The full path to the main package is used in the
+# imports tool to format imports correctly.
+NAMESPACE = github.com/xorcare/golden
+
+# The name of the file recommended in the standard
+# documentation go test -cover and used codecov.io
+# to check code coverage.
 COVER_FILE ?= coverage.out
 
-# Tools
-GOLINT = $(GOBIN)/golint
+# Maximum life time of the compiled tool in minutes.
+# This limitation is needed to periodically update
+# auxiliary tools and at the same time have a cache
+# to speed up statically checks and build.
+TOOL_LIFETIME ?= 60
+
+# The section contains installation instructions for auxiliary tools.
+GOLINT = $(GOPATH_BIN)/golint
+.PHONY: $(GOLINT)
 $(GOLINT):
-	GO111MODULE=off go get -u golang.org/x/lint/golint
+	@if [ $$(find $(GOLINT) -type f -maxdepth 0 -cmin -$(TOOL_LIFETIME) 2> /dev/null | wc -l) -eq 0 ]; \
+		then GO111MODULE=off go get -u golang.org/x/lint/golint; fi
 
-GOIMPORTS = $(GOBIN)/goimports
+GOIMPORTS = $(GOPATH_BIN)/goimports
+.PHONY: $(GOIMPORTS)
 $(GOIMPORTS):
-	GO111MODULE=off go get -u golang.org/x/tools/cmd/goimports
+	@if [ $$(find $(GOIMPORTS) -type f -maxdepth 0 -cmin -$(TOOL_LIFETIME) 2> /dev/null | wc -l) -eq 0 ]; \
+		then GO111MODULE=off go get -u golang.org/x/tools/cmd/goimports; fi
 
-# Main targets
-all: depin check build
-.DEFAULT_GOAL := all
+# Main targets.
+.DEFAULT_GOAL := help
 
 .PHONY: bench
 bench: ## Run benchmarks
@@ -24,7 +42,7 @@ bench: ## Run benchmarks
 
 .PHONY: build
 build: ## Build the project binary
-	@go build
+	@go build ./...
 
 .PHONY: check
 check: static test ## Check project with static checks and unit tests
@@ -37,13 +55,21 @@ cover: $(COVER_FILE) ## Output coverage in human readable form in html
 	@go tool cover -html=$(COVER_FILE)
 	@rm -f $(COVER_FILE)
 
+.PHONY: dep
+dep: ## Install and sync go modules dependencies, beautify go.mod and go.sum files
+	@go mod download
+	@go mod tidy
+	@go mod download
+	@go mod verify
+
 .PHONY: fmt
 fmt: ## Run go fmt for the whole project
 	@test -z $$(for d in $$(go list -f {{.Dir}} ./...); do go fmt $$d/*.go; done)
 
 .PHONY: help
 help: ## Print this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
+	awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: imports
 imports: $(GOIMPORTS) ## Check and fix import section by import rules
@@ -58,25 +84,23 @@ static: fmt imports vet lint ## Run static checks (fmt, lint, imports, vet, ...)
 
 .PHONY: test
 test: ## Run unit tests
-	@go test ./... -coverprofile=$(COVER_FILE) -covermode=atomic $d
+	@go test ./... $(ARGS) -coverprofile=$(COVER_FILE) -covermode=atomic $d
+	@go tool cover -func=$(COVER_FILE) | grep ^total
+
+.PHONY: testin
+testin: ## Run integration tests
+	@go test ./... -tags=integration -coverprofile=$(COVER_FILE) -covermode=atomic $d
 	@go tool cover -func=$(COVER_FILE) | grep ^total
 
 .PHONY: testup
 testup: ## Run unit tests with golden files update
-	@go test -v ./... -update
+	@rm -r testdata
+	@go test ./... -update
 
 .PHONY: tools
-tools: $(GOLINT) $(GOIMPORTS) ## Install all needed tools, e.g. for static checks
-
-.PHONY: depin
-depin: ## Install go mod dependencies, beautify go.mod and go.sum files
-	@go mod tidy
-	@go mod verify
-
-.PHONY: depup
-depup: ## Update go mod dependencies, beautify go.mod and go.sum files
-	@go mod download
-	@go mod verify
+tools: ## Install all needed tools, e.g. for static checks
+	@for tool in $(GOLINT) $(GOIMPORTS); \
+	do rm -f $$tool && $(MAKE) $$tool; done
 
 .PHONY: vet
 vet: ## Check the project with vet
