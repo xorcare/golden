@@ -293,7 +293,7 @@ func TestWrite(t *testing.T) {
 		bytes []byte
 	}
 	type stat struct {
-		fileInfo *FakeFile
+		fileInfo *FakeStat
 		error    error
 	}
 	tests := []struct {
@@ -323,7 +323,7 @@ func TestWrite(t *testing.T) {
 				bytes: nil,
 			},
 			stat: stat{
-				fileInfo: new(FakeFile),
+				fileInfo: new(FakeStat),
 			},
 			recover: false,
 		},
@@ -335,7 +335,7 @@ func TestWrite(t *testing.T) {
 				bytes: []byte{},
 			},
 			stat: stat{
-				fileInfo: new(FakeFile),
+				fileInfo: new(FakeStat),
 			},
 			recover: false,
 		},
@@ -347,7 +347,7 @@ func TestWrite(t *testing.T) {
 				bytes: []byte("golden"),
 			},
 			stat: stat{
-				fileInfo: new(FakeFile),
+				fileInfo: &FakeStat{isDir: true},
 			},
 			recover: false,
 		},
@@ -370,7 +370,11 @@ func TestWrite(t *testing.T) {
 			defer func() { tool = origin }()
 
 			tool.writeFile = func(filename string, data []byte, perm os.FileMode) error {
-				t.Logf(`os.WriteFile(%q, %q, %d) `, filename, data, perm)
+				t.Logf(`os.WriteFile(%q, %q, %d)`, filename, data, perm)
+				helper.SetTest(t).compare(data, tt.args.bytes)
+				if data == nil {
+					t.Errorf("you cannot write nil values to a file")
+				}
 				return tt.writeFile
 			}
 			tool.mkdirAll = func(path string, perm os.FileMode) error {
@@ -779,7 +783,7 @@ func TestTool_Update(t *testing.T) {
 		bytes []byte
 	}
 	type stat struct {
-		fileInfo *FakeFile
+		fileInfo *FakeStat
 		error    error
 	}
 	fal := false
@@ -810,6 +814,10 @@ func TestTool_Update(t *testing.T) {
 			tool: Tool{UpdateFlag: &tru},
 			args: args{
 				[]byte("golden"),
+			},
+			stat: stat{
+				fileInfo: &FakeStat{isDir: true},
+				error:    nil,
 			},
 		},
 	}
@@ -842,7 +850,7 @@ func TestTool_Write(t *testing.T) {
 		bytes []byte
 	}
 	type stat struct {
-		fileInfo *FakeFile
+		fileInfo *FakeStat
 		error    error
 	}
 	tests := []struct {
@@ -873,7 +881,7 @@ func TestTool_Write(t *testing.T) {
 				bytes: nil,
 			},
 			stat: stat{
-				fileInfo: new(FakeFile),
+				fileInfo: new(FakeStat),
 				error:    nil,
 			},
 			recover: false,
@@ -886,7 +894,7 @@ func TestTool_Write(t *testing.T) {
 				bytes: []byte{},
 			},
 			stat: stat{
-				fileInfo: new(FakeFile),
+				fileInfo: new(FakeStat),
 			},
 			recover: false,
 		},
@@ -898,7 +906,7 @@ func TestTool_Write(t *testing.T) {
 				bytes: []byte("golden"),
 			},
 			stat: stat{
-				fileInfo: new(FakeFile),
+				fileInfo: &FakeStat{isDir: true},
 			},
 			recover: false,
 		},
@@ -920,6 +928,10 @@ func TestTool_Write(t *testing.T) {
 			tt.args.test.name = t.Name()
 			tt.tool.writeFile = func(filename string, data []byte, perm os.FileMode) error {
 				t.Logf(`os.WriteFile(%q, %q, %d) `, filename, data, perm)
+				helper.SetTest(t).compare(data, tt.args.bytes)
+				if data == nil {
+					t.Errorf("you cannot write nil values to a file")
+				}
 				return tt.writeFile
 			}
 			tt.tool.mkdirAll = func(path string, perm os.FileMode) error {
@@ -1018,7 +1030,7 @@ func TestTool_mkdir(t *testing.T) {
 		loc string
 	}
 	type stat struct {
-		fileInfo *FakeFile
+		fileInfo *FakeStat
 		error    error
 	}
 	tests := []struct {
@@ -1056,7 +1068,7 @@ func TestTool_mkdir(t *testing.T) {
 				loc: tool.SetTest(t).Path(),
 			},
 			stat: stat{
-				fileInfo: new(FakeFile),
+				fileInfo: new(FakeStat),
 				error:    nil,
 			},
 			recover: false,
@@ -1168,39 +1180,40 @@ func (m *FakeTest) Assert(t tb) {
 	helper.SetTest(t).Assert(jsonBytes)
 }
 
-// FakeFile implements FileLike and also os.FileInfo.
-type FakeFile struct {
+// FakeStat implements os.FileInfo.
+type FakeStat struct {
 	name     string
 	contents string
 	mode     os.FileMode
 	offset   int
-}
-
-// FileLike methods.
-
-func (f *FakeFile) Name() string {
-	// A bit of a cheat: we only have a basename, so that's also ok for FileInfo.
-	return f.name
+	isDir    bool
 }
 
 // os.FileInfo methods.
 
-func (f *FakeFile) Size() int64 {
+func (f *FakeStat) Name() string {
+	// A bit of a cheat: we only
+	// have a basename, so that's
+	// also ok for FileInfo.
+	return f.name
+}
+
+func (f *FakeStat) Size() int64 {
 	return int64(len(f.contents))
 }
 
-func (f *FakeFile) Mode() os.FileMode {
+func (f *FakeStat) Mode() os.FileMode {
 	return f.mode
 }
 
-func (f *FakeFile) ModTime() time.Time {
+func (f *FakeStat) ModTime() time.Time {
 	return time.Time{}
 }
 
-func (f *FakeFile) IsDir() bool {
-	return false
+func (f *FakeStat) IsDir() bool {
+	return f.isDir
 }
 
-func (f *FakeFile) Sys() interface{} {
+func (f *FakeStat) Sys() interface{} {
 	return nil
 }

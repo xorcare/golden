@@ -1,7 +1,4 @@
 {
-	"errs": [
-		"golden: test dir is a file: testdata/TestWrite"
-	],
 	"logs": [
 		"golden: start write to file: testdata/TestWrite/write-bytes.golden"
 	]
