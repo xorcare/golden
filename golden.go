@@ -5,7 +5,7 @@
 package golden
 
 import (
-	bytesSGL "bytes"
+	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -104,8 +104,8 @@ func SetTest(t tb) Tool {
 
 // Write is a functional for writing both input and golden files using
 // the appropriate target.
-func Write(t tb, tar target, bytes []byte) {
-	tool.SetTarget(tar).SetTest(t).Write(bytes)
+func Write(t tb, tar target, bs []byte) {
+	tool.SetTarget(tar).SetTest(t).Write(bs)
 }
 
 // Assert is a tool to compare the actual value obtained in the test and
@@ -147,10 +147,10 @@ func (tool Tool) Path() (path string) {
 
 // Read is a functional for reading both input and golden files using
 // the appropriate target.
-func (tool Tool) Read() (bytes []byte) {
+func (tool Tool) Read() (bs []byte) {
 	const f = "golden: read the value of nil since it is not found file: %s"
 
-	bytes, err := tool.readFile(tool.Path())
+	bs, err := tool.readFile(tool.Path())
 	if os.IsNotExist(err) {
 		tool.Test.Logf(f, tool.Path())
 		return nil
@@ -158,16 +158,16 @@ func (tool Tool) Read() (bytes []byte) {
 		tool.Test.Fatalf("golden: %s", err)
 	}
 
-	return bytes
+	return bs
 }
 
 // Run is a functional that automates the process of reading the input file
 // of the test bytes and the execution of the input function of testing and
 // checking the results.
 func (tool Tool) Run(do func(input []byte) (got []byte, err error)) {
-	bytes, err := do(tool.SetTarget(Input).Read())
+	bs, err := do(tool.SetTarget(Input).Read())
 	tool.ok(err)
-	tool.Assert(bytes)
+	tool.Assert(bs)
 }
 
 // SetDir a dir value setter.
@@ -196,22 +196,22 @@ func (tool Tool) SetTest(t tb) Tool {
 
 // Update functional reviewer is the need to update the golden files
 // and doing it.
-func (tool Tool) Update(bytes []byte) {
+func (tool Tool) Update(bs []byte) {
 	if tool.UpdateFlag == nil || !*tool.UpdateFlag {
 		return
 	}
 
 	tool.Test.Logf("golden: updating file: %s", tool.Path())
-	tool.Write(bytes)
+	tool.Write(bs)
 }
 
 // Write is a functional for writing both input and golden files using
 // the appropriate target.
-func (tool Tool) Write(bytes []byte) {
+func (tool Tool) Write(bs []byte) {
 	path := tool.Path()
 	tool.mkdir(filepath.Dir(path))
 	tool.Test.Logf("golden: start write to file: %s", path)
-	if bytes == nil {
+	if bs == nil {
 		tool.Test.Logf("golden: nil value will not be written")
 		fileInfo, err := tool.stat(path)
 		if err == nil && !fileInfo.IsDir() {
@@ -222,13 +222,13 @@ func (tool Tool) Write(bytes []byte) {
 			tool.ok(err)
 		}
 	} else {
-		tool.ok(tool.writeFile(path, bytes, tool.FileMode))
+		tool.ok(tool.writeFile(path, bs, tool.FileMode))
 	}
 }
 
 // compare mechanism to compare the bytes.
 func (tool Tool) compare(got, want []byte) {
-	if !bytesSGL.Equal(got, want) {
+	if !bytes.Equal(got, want) {
 		format := "golden: compare error got = %#v, want %#v"
 		if utf8.ValidString(string(want)) || utf8.ValidString(string(got)) {
 			format = "golden: compare error got = %q, want %q"
