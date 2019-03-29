@@ -811,6 +811,10 @@ func TestTool_Update(t *testing.T) {
 			args: args{
 				[]byte("golden"),
 			},
+			stat: stat{
+				fileInfo: &FakeStat{isDir: true},
+				error:    nil,
+			},
 		},
 	}
 	for _, tt := range tests {
@@ -1174,6 +1178,7 @@ type FakeStat struct {
 	contents string
 	mode     os.FileMode
 	offset   int
+	isDir    bool
 }
 
 // os.FileInfo methods.
@@ -1198,7 +1203,7 @@ func (f *FakeStat) ModTime() time.Time {
 }
 
 func (f *FakeStat) IsDir() bool {
-	return false
+	return f.isDir
 }
 
 func (f *FakeStat) Sys() interface{} {
