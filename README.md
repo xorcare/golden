@@ -4,6 +4,7 @@
 [![codecov](https://codecov.io/gh/xorcare/golden/badge.svg)](https://codecov.io/gh/xorcare/golden)
 [![Go Report Card](https://goreportcard.com/badge/github.com/xorcare/golden)](https://goreportcard.com/report/github.com/xorcare/golden)
 [![GoDoc](https://godoc.org/github.com/xorcare/golden?status.svg)](https://godoc.org/github.com/xorcare/golden)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fxorcare%2Fgolden.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fxorcare%2Fgolden?ref=badge_shield)
 
 Package golden testing with golden files in Go. A golden file is the expected
 output of test, stored as a separate file rather than as a string literal inside
@@ -86,3 +87,6 @@ func TestDecode(t *testing.T) {
 Released under the [BSD 3-Clause License][LICENSE].
 
 [LICENSE]: https://git.io/fhjjx 'BSD 3-Clause "New" or "Revised" License'
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fxorcare%2Fgolden.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fxorcare%2Fgolden?ref=badge_large)
