@@ -347,7 +347,7 @@ func TestWrite(t *testing.T) {
 				bytes: []byte("golden"),
 			},
 			stat: stat{
-				fileInfo: new(FakeStat),
+				fileInfo: &FakeStat{isDir: true},
 			},
 			recover: false,
 		},
@@ -370,7 +370,11 @@ func TestWrite(t *testing.T) {
 			defer func() { tool = origin }()
 
 			tool.writeFile = func(filename string, data []byte, perm os.FileMode) error {
-				t.Logf(`os.WriteFile(%q, %q, %d) `, filename, data, perm)
+				t.Logf(`os.WriteFile(%q, %q, %d)`, filename, data, perm)
+				helper.SetTest(t).compare(data, tt.args.bytes)
+				if data == nil {
+					t.Errorf("you cannot write nil values to a file")
+				}
 				return tt.writeFile
 			}
 			tool.mkdirAll = func(path string, perm os.FileMode) error {
@@ -902,7 +906,7 @@ func TestTool_Write(t *testing.T) {
 				bytes: []byte("golden"),
 			},
 			stat: stat{
-				fileInfo: new(FakeStat),
+				fileInfo: &FakeStat{isDir: true},
 			},
 			recover: false,
 		},
@@ -924,6 +928,10 @@ func TestTool_Write(t *testing.T) {
 			tt.args.test.name = t.Name()
 			tt.tool.writeFile = func(filename string, data []byte, perm os.FileMode) error {
 				t.Logf(`os.WriteFile(%q, %q, %d) `, filename, data, perm)
+				helper.SetTest(t).compare(data, tt.args.bytes)
+				if data == nil {
+					t.Errorf("you cannot write nil values to a file")
+				}
 				return tt.writeFile
 			}
 			tt.tool.mkdirAll = func(path string, perm os.FileMode) error {
