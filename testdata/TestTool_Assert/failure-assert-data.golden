@@ -1,5 +1,5 @@
 {
 	"fats": [
-		"golden: compare error got = \"Z29sZGVu\", want \"golden\""
+		"golden: compare error got = \"golden\", want \"Z29sZGVu\""
 	]
 }
