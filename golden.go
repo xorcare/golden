@@ -113,7 +113,7 @@ func Write(t tb, tar target, bs []byte) {
 // updating golden files using the command line flag.
 func (tool Tool) Assert(got []byte) {
 	tool.Update(got)
-	tool.compare(tool.SetTarget(Golden).Read(), got)
+	tool.compare(got, tool.SetTarget(Golden).Read())
 }
 
 // Path is getter to get the path to the file containing the test data.
