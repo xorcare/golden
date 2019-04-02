@@ -17,17 +17,9 @@ import (
 var helper = tool
 
 func TestMain(m *testing.M) {
-	helper.UpdateFlag = tool.UpdateFlag
-	tool.UpdateFlag = nil
+	helper.flag = tool.flag
+	tool.flag = nil
 	os.Exit(m.Run())
-}
-
-func TestToolDefault(t *testing.T) {
-	jsonBytes, err := json.MarshalIndent(tool, "", "\t")
-	if err != nil {
-		t.Fatalf("TestToolDefault() failed json.Marshal(%#v), \n error: %v", tool, err)
-	}
-	helper.SetTest(t).Assert(jsonBytes)
 }
 
 func TestAssert(t *testing.T) {
@@ -271,7 +263,7 @@ func TestSetTest(t *testing.T) {
 		{
 			name: "set-test-mock",
 			args: args{m},
-			want: Tool{Test: m},
+			want: Tool{test: m},
 		},
 	}
 	for _, tt := range tests {
@@ -279,8 +271,8 @@ func TestSetTest(t *testing.T) {
 			origin := tool
 			defer func() { tool = origin }()
 
-			if got := SetTest(tt.args.test); got.Test != tt.want.Test {
-				t.Errorf("SetTest() = %v, want %v", got.Test, tt.want.Test)
+			if got := SetTest(tt.args.test); got.test != tt.want.test {
+				t.Errorf("SetTest() = %v, want %v", got.test, tt.want.test)
 			}
 		})
 	}
@@ -521,7 +513,7 @@ func TestTool_Path(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.tool.Test = &FakeTest{name: t.Name()}
+			tt.tool.test = &FakeTest{name: t.Name()}
 			if gotPath := tt.tool.Path(); gotPath != tt.wantPath {
 				t.Errorf("Tool.Path() = %v, want %v", gotPath, tt.wantPath)
 			}
@@ -673,7 +665,7 @@ func TestTool_SetDir(t *testing.T) {
 				dir: "golden",
 			},
 			want: Tool{
-				Dir: "golden",
+				dir: "golden",
 			},
 		},
 	}
@@ -702,7 +694,7 @@ func TestTool_SetIndex(t *testing.T) {
 				index: 1,
 			},
 			want: Tool{
-				Index: 1,
+				index: 1,
 			},
 		},
 	}
@@ -731,7 +723,7 @@ func TestTool_SetTarget(t *testing.T) {
 				tar: Input,
 			},
 			want: Tool{
-				Target: Input,
+				target: Input,
 			},
 		},
 	}
@@ -766,7 +758,7 @@ func TestTool_SetTest(t *testing.T) {
 			args: args{
 				t: t,
 			},
-			want: Tool{Test: t},
+			want: Tool{test: t},
 		},
 	}
 	for _, tt := range tests {
@@ -797,21 +789,21 @@ func TestTool_Update(t *testing.T) {
 	}{
 		{
 			name: "not-update-with-nil",
-			tool: Tool{UpdateFlag: nil},
+			tool: Tool{flag: nil},
 			args: args{
 				[]byte("golden"),
 			},
 		},
 		{
 			name: "not-update-with-false",
-			tool: Tool{UpdateFlag: &fal},
+			tool: Tool{flag: &fal},
 			args: args{
 				[]byte("golden"),
 			},
 		},
 		{
 			name: "update-with-true",
-			tool: Tool{UpdateFlag: &tru},
+			tool: Tool{flag: &tru},
 			args: args{
 				[]byte("golden"),
 			},
