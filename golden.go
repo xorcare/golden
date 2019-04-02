@@ -86,7 +86,7 @@ func Assert(t tb, got []byte) {
 // Read is a functional for reading both input and golden files using
 // the appropriate target.
 func Read(t tb, tar target) []byte {
-	return tool.SetTarget(tar).SetTest(t).Read()
+	return tool.SetTest(t).SetTarget(tar).Read()
 }
 
 // Run is a functional that automates the process of reading the input file
@@ -105,7 +105,7 @@ func SetTest(t tb) Tool {
 // Write is a functional for writing both input and golden files using
 // the appropriate target.
 func Write(t tb, tar target, bs []byte) {
-	tool.SetTarget(tar).SetTest(t).Write(bs)
+	tool.SetTest(t).SetTarget(tar).Write(bs)
 }
 
 // Assert is a tool to compare the actual value obtained in the test and
@@ -188,7 +188,8 @@ func (tool Tool) SetTarget(tar target) Tool {
 	return tool
 }
 
-// SetTest a test value setter.
+// SetTest a test value setter in the call chain must be used first
+// to prevent abnormal situations when using other methods.
 func (tool Tool) SetTest(t tb) Tool {
 	tool.Test = t
 	return tool
