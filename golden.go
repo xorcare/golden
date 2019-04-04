@@ -105,12 +105,6 @@ func SetTest(t tb) Tool {
 	return tool.SetTest(t)
 }
 
-// Write is a functional for writing both input and golden files using
-// the appropriate target.
-func Write(t tb, tar target, bs []byte) {
-	tool.SetTest(t).SetTarget(tar).Write(bs)
-}
-
 // Assert is a tool to compare the actual value obtained in the test and
 // the value from the golden file. Also built-in functionality for
 // updating golden files using the command line flag.
@@ -200,12 +194,12 @@ func (tool Tool) Update(bs []byte) {
 	}
 
 	tool.test.Logf("golden: updating file: %s", tool.Path())
-	tool.Write(bs)
+	tool.write(bs)
 }
 
-// Write is a functional for writing both input and golden files using
+// write is a functional for writing both input and golden files using
 // the appropriate target.
-func (tool Tool) Write(bs []byte) {
+func (tool Tool) write(bs []byte) {
 	path := tool.Path()
 	tool.mkdir(filepath.Dir(path))
 	tool.test.Logf("golden: start write to file: %s", path)
