@@ -649,35 +649,6 @@ func TestTool_Run(t *testing.T) {
 	}
 }
 
-func TestTool_SetDir(t *testing.T) {
-	type args struct {
-		dir string
-	}
-	tests := []struct {
-		name string
-		tool Tool
-		args args
-		want Tool
-	}{
-		{
-			name: "golden",
-			args: args{
-				dir: "golden",
-			},
-			want: Tool{
-				dir: "golden",
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.tool.SetDir(tt.args.dir); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Tool.SetDir() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestTool_SetIndex(t *testing.T) {
 	type args struct {
 		index uint8

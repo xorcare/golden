@@ -58,6 +58,9 @@ type Tool struct {
 // functions that provide a simplified api for convenient interaction
 // with the functionality of the package.
 var tool = Tool{
+	// dir testdata is the directory for test data already accepted
+	// in the standard library which is also ignored by standard
+	// go tools and should not change in your tests.
 	dir:      "testdata",
 	outExt:   "golden",
 	inpExt:   "input",
@@ -168,12 +171,6 @@ func (tool Tool) Run(do func(input []byte) (got []byte, err error)) {
 	bs, err := do(tool.SetTarget(Input).Read())
 	tool.ok(err)
 	tool.Assert(bs)
-}
-
-// SetDir a dir value setter.
-func (tool Tool) SetDir(dir string) Tool {
-	tool.dir = dir
-	return tool
 }
 
 // SetIndex a index value setter.
