@@ -278,126 +278,6 @@ func TestSetTest(t *testing.T) {
 	}
 }
 
-func TestWrite(t *testing.T) {
-	type args struct {
-		test  *FakeTest
-		tar   target
-		bytes []byte
-	}
-	type stat struct {
-		fileInfo *FakeStat
-		error    error
-	}
-	tests := []struct {
-		name      string
-		args      args
-		writeFile error
-		stat      stat
-		recover   bool
-	}{
-		{
-			name: "write-nil",
-			args: args{
-				test:  new(FakeTest),
-				tar:   Golden,
-				bytes: nil,
-			},
-			stat: stat{
-				error: os.ErrNotExist,
-			},
-			recover: false,
-		},
-		{
-			name: "write-nil-with-file-exist",
-			args: args{
-				test:  new(FakeTest),
-				tar:   Golden,
-				bytes: nil,
-			},
-			stat: stat{
-				fileInfo: new(FakeStat),
-			},
-			recover: false,
-		},
-		{
-			name: "write-empty",
-			args: args{
-				test:  new(FakeTest),
-				tar:   Golden,
-				bytes: []byte{},
-			},
-			stat: stat{
-				fileInfo: new(FakeStat),
-			},
-			recover: false,
-		},
-		{
-			name: "write-bytes",
-			args: args{
-				test:  new(FakeTest),
-				tar:   Golden,
-				bytes: []byte("golden"),
-			},
-			stat: stat{
-				fileInfo: &FakeStat{isDir: true},
-			},
-			recover: false,
-		},
-		{
-			name: "fatality-error",
-			args: args{
-				test:  new(FakeTest),
-				tar:   Golden,
-				bytes: []byte("golden"),
-			},
-			stat: stat{
-				error: os.ErrPermission,
-			},
-			recover: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			origin := tool
-			defer func() { tool = origin }()
-
-			tool.writeFile = func(filename string, data []byte, perm os.FileMode) error {
-				t.Logf(`os.WriteFile(%q, %q, %d)`, filename, data, perm)
-				helper.SetTest(t).compare(data, tt.args.bytes)
-				if data == nil {
-					t.Errorf("you cannot write nil values to a file")
-				}
-				return tt.writeFile
-			}
-			tool.mkdirAll = func(path string, perm os.FileMode) error {
-				t.Logf(`os.MkdirAll(%q, %d) `, path, perm)
-				return nil
-			}
-			tool.remove = func(name string) error {
-				t.Logf(`os.Remove(%q)`, name)
-				return nil
-			}
-			tool.stat = func(name string) (os.FileInfo, error) {
-				t.Logf(`os.Stat(%q)`, name)
-				if tt.stat.fileInfo != nil {
-					tt.stat.fileInfo.name = name
-				}
-				return tt.stat.fileInfo, tt.stat.error
-			}
-			{
-				defer func() {
-					if r := recover(); (r == nil) == tt.recover {
-						t.Error(r)
-					}
-					tt.args.test.Assert(t)
-				}()
-				tt.args.test.name = t.Name()
-				Write(tt.args.test, tt.args.tar, tt.args.bytes)
-			}
-		})
-	}
-}
-
 func TestTool_Assert(t *testing.T) {
 	type args struct {
 		got []byte
@@ -921,7 +801,7 @@ func TestTool_Write(t *testing.T) {
 				}()
 				tt.tool.SetTest(tt.args.test).
 					SetTarget(tt.args.tar).
-					Write(tt.args.bytes)
+					write(tt.args.bytes)
 			}
 		})
 	}
