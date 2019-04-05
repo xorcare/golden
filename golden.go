@@ -113,8 +113,8 @@ func (tool Tool) Assert(got []byte) {
 	tool.compare(got, tool.SetTarget(Golden).Read())
 }
 
-// Path is getter to get the path to the file containing the test data.
-func (tool Tool) Path() (path string) {
+// path is getter to get the path to the file containing the test data.
+func (tool Tool) path() (path string) {
 	ext := tool.outExt
 	if tool.target == Input {
 		ext = tool.inpExt
@@ -147,9 +147,9 @@ func (tool Tool) Path() (path string) {
 func (tool Tool) Read() (bs []byte) {
 	const f = "golden: read the value of nil since it is not found file: %s"
 
-	bs, err := tool.readFile(tool.Path())
+	bs, err := tool.readFile(tool.path())
 	if os.IsNotExist(err) {
-		tool.test.Logf(f, tool.Path())
+		tool.test.Logf(f, tool.path())
 		return nil
 	} else if err != nil {
 		tool.test.Fatalf("golden: %s", err)
@@ -193,14 +193,14 @@ func (tool Tool) Update(bs []byte) {
 		return
 	}
 
-	tool.test.Logf("golden: updating file: %s", tool.Path())
+	tool.test.Logf("golden: updating file: %s", tool.path())
 	tool.write(bs)
 }
 
 // write is a functional for writing both input and golden files using
 // the appropriate target.
 func (tool Tool) write(bs []byte) {
-	path := tool.Path()
+	path := tool.path()
 	tool.mkdir(filepath.Dir(path))
 	tool.test.Logf("golden: start write to file: %s", path)
 	if bs == nil {
