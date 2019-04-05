@@ -394,8 +394,8 @@ func TestTool_Path(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.tool.test = &FakeTest{name: t.Name()}
-			if gotPath := tt.tool.Path(); gotPath != tt.wantPath {
-				t.Errorf("Tool.Path() = %v, want %v", gotPath, tt.wantPath)
+			if gotPath := tt.tool.path(); gotPath != tt.wantPath {
+				t.Errorf("Tool.path() = %v, want %v", gotPath, tt.wantPath)
 			}
 		})
 	}
@@ -888,7 +888,7 @@ func TestTool_mkdir(t *testing.T) {
 		{
 			name: "fatality-error",
 			args: args{
-				loc: tool.SetTest(t).Path(),
+				loc: tool.SetTest(t).path(),
 			},
 			stat: stat{
 				error: os.ErrPermission,
@@ -898,7 +898,7 @@ func TestTool_mkdir(t *testing.T) {
 		{
 			name: "error-file-does-not-exist",
 			args: args{
-				loc: tool.SetTest(t).Path(),
+				loc: tool.SetTest(t).path(),
 			},
 			stat: stat{
 				error: os.ErrNotExist,
@@ -908,7 +908,7 @@ func TestTool_mkdir(t *testing.T) {
 		{
 			name: "error-dir-is-a-file",
 			args: args{
-				loc: tool.SetTest(t).Path(),
+				loc: tool.SetTest(t).path(),
 			},
 			stat: stat{
 				fileInfo: new(FakeStat),
