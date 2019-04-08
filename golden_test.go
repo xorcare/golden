@@ -359,44 +359,41 @@ func TestTool_Assert(t *testing.T) {
 	}
 }
 
-func TestTool_Path(t *testing.T) {
+func TestTool_path(t *testing.T) {
 	tests := []struct {
 		name     string
 		tool     Tool
 		wantPath string
 	}{
 		{
-			name:     "initial",
-			tool:     Tool{},
-			wantPath: "TestTool_Path/initial.",
+			name: "empty",
+			tool: Tool{},
 		},
 		{
-			name:     "input-target-path",
-			tool:     tool.SetTarget(Input),
-			wantPath: "testdata/TestTool_Path/input-target-path.input",
+			name: "default",
+			tool: tool,
 		},
 		{
-			name:     "golden-target-path",
-			tool:     tool.SetTarget(Golden),
-			wantPath: "testdata/TestTool_Path/golden-target-path.golden",
+			name: "path-index-0-target-input",
+			tool: tool.SetIndex(0).SetTarget(Input),
 		},
 		{
-			name:     "default-target-path",
-			tool:     tool.SetTarget(0),
-			wantPath: "testdata/TestTool_Path/default-target-path.input",
+			name: "path-index-1-target-input",
+			tool: tool.SetIndex(1).SetTarget(Input),
 		},
 		{
-			name:     "set-index-path",
-			tool:     tool.SetIndex(1).SetTarget(Golden),
-			wantPath: "testdata/TestTool_Path/set-index-path.001.golden",
+			name: "path-index-0-target-golden",
+			tool: tool.SetIndex(0).SetTarget(Golden),
+		},
+		{
+			name: "path-index-1-target-golden",
+			tool: tool.SetIndex(1).SetTarget(Golden),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.tool.test = &FakeTest{name: t.Name()}
-			if gotPath := tt.tool.path(); gotPath != tt.wantPath {
-				t.Errorf("Tool.path() = %v, want %v", gotPath, tt.wantPath)
-			}
+			helper.SetTest(t).Assert([]byte(tt.tool.path()))
 		})
 	}
 }
