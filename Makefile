@@ -94,7 +94,7 @@ testin: ## Run integration tests
 
 .PHONY: testup
 testup: ## Run unit tests with golden files update
-	@rm -r testdata
+	@find . -type f -name '*.golden' -exec rm -f {} \;
 	@go test ./... -update
 
 .PHONY: tools
