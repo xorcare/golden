@@ -389,11 +389,27 @@ func TestTool_path(t *testing.T) {
 			name: "path-index-1-target-golden",
 			tool: tool.SetIndex(1).SetTarget(Golden),
 		},
+		{
+			name: "path-index-0-target-input-prefix-gold",
+			tool: tool.SetIndex(0).SetTarget(Input).SetPrefix("gold"),
+		},
+		{
+			name: "path-index-1-target-input-prefix-gold",
+			tool: tool.SetIndex(1).SetTarget(Input).SetPrefix("gold"),
+		},
+		{
+			name: "path-index-0-target-golden-prefix-gold",
+			tool: tool.SetIndex(0).SetTarget(Golden).SetPrefix("gold"),
+		},
+		{
+			name: "path-index-1-target-golden-prefix-gold",
+			tool: tool.SetIndex(1).SetTarget(Golden).SetPrefix("gold"),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.tool.test = &FakeTest{name: t.Name()}
-			helper.SetTest(t).Assert([]byte(tt.tool.path()))
+			test := &FakeTest{name: t.Name()}
+			helper.SetTest(t).Assert([]byte(tt.tool.SetTest(test).path()))
 		})
 	}
 }

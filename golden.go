@@ -46,6 +46,7 @@ type Tool struct {
 	outExt   string
 	target   target
 	flag     *bool
+	prefix   string
 
 	mkdirAll  func(path string, perm os.FileMode) error
 	readFile  func(filename string) ([]byte, error)
@@ -113,35 +114,6 @@ func (tool Tool) Assert(got []byte) {
 	tool.compare(got, tool.SetTarget(Golden).Read())
 }
 
-// path is getter to get the path to the file containing the test data.
-func (tool Tool) path() (path string) {
-	ext := tool.outExt
-	if tool.target == Input {
-		ext = tool.inpExt
-	}
-
-	if tool.index == 0 {
-		return filepath.Join(
-			tool.dir,
-			fmt.Sprintf(
-				"%s.%s",
-				tool.test.Name(),
-				ext,
-			),
-		)
-	}
-
-	return filepath.Join(
-		tool.dir,
-		fmt.Sprintf(
-			"%s.%03d.%s",
-			tool.test.Name(),
-			tool.index,
-			ext,
-		),
-	)
-}
-
 // Read is a functional for reading both input and golden files using
 // the appropriate target.
 func (tool Tool) Read() (bs []byte) {
@@ -170,6 +142,12 @@ func (tool Tool) Run(do func(input []byte) (got []byte, err error)) {
 // SetIndex a index value setter.
 func (tool Tool) SetIndex(index uint8) Tool {
 	tool.index = index
+	return tool
+}
+
+// SetPrefix a prefix value setter.
+func (tool Tool) SetPrefix(prefix string) Tool {
+	tool.prefix = prefix
 	return tool
 }
 
@@ -248,4 +226,30 @@ func (tool Tool) ok(err error) {
 	if err != nil {
 		tool.test.Fatalf("golden: %s", err)
 	}
+}
+
+// path is getter to get the path to the file containing the test data.
+func (tool Tool) path() (path string) {
+	ext := tool.outExt
+	if tool.target == Input {
+		ext = tool.inpExt
+	}
+
+	s := fmt.Sprintf("%s.%s", tool.test.Name(), ext)
+	switch {
+	case tool.prefix != "" && tool.index > 0:
+		s = fmt.Sprintf(
+			"%s.%s.%03d.%s",
+			tool.test.Name(),
+			tool.prefix,
+			tool.index,
+			ext,
+		)
+	case tool.prefix != "":
+		s = fmt.Sprintf("%s.%s.%s", tool.test.Name(), tool.prefix, ext)
+	case tool.index > 0:
+		s = fmt.Sprintf("%s.%03d.%s", tool.test.Name(), tool.index, ext)
+	}
+
+	return filepath.Join(tool.dir, s)
 }
