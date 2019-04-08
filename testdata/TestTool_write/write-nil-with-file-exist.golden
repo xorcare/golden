@@ -1,9 +1,9 @@
 {
 	"errs": [
-		"golden: test dir is a file: TestTool_Write"
+		"golden: test dir is a file: TestTool_write"
 	],
 	"logs": [
-		"golden: start write to file: TestTool_Write/write-nil-with-file-exist.",
+		"golden: start write to file: TestTool_write/write-nil-with-file-exist.",
 		"golden: nil value will not be written",
 		"golden: current test bytes file will be deleted"
 	]

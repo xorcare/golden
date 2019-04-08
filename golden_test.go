@@ -686,7 +686,7 @@ func TestTool_Update(t *testing.T) {
 	}
 }
 
-func TestTool_Write(t *testing.T) {
+func TestTool_write(t *testing.T) {
 	type args struct {
 		test  *FakeTest
 		tar   target
