@@ -1,8 +1,0 @@
-{
-	"errs": [
-		"golden: test dir is a file: TestTool_Write"
-	],
-	"logs": [
-		"golden: start write to file: TestTool_Write/write-empty."
-	]
-}

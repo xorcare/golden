@@ -17,17 +17,9 @@ import (
 var helper = tool
 
 func TestMain(m *testing.M) {
-	helper.UpdateFlag = tool.UpdateFlag
-	tool.UpdateFlag = nil
+	helper.flag = tool.flag
+	tool.flag = nil
 	os.Exit(m.Run())
-}
-
-func TestToolDefault(t *testing.T) {
-	jsonBytes, err := json.MarshalIndent(tool, "", "\t")
-	if err != nil {
-		t.Fatalf("TestToolDefault() failed json.Marshal(%#v), \n error: %v", tool, err)
-	}
-	helper.SetTest(t).Assert(jsonBytes)
 }
 
 func TestAssert(t *testing.T) {
@@ -271,7 +263,7 @@ func TestSetTest(t *testing.T) {
 		{
 			name: "set-test-mock",
 			args: args{m},
-			want: Tool{Test: m},
+			want: Tool{test: m},
 		},
 	}
 	for _, tt := range tests {
@@ -279,128 +271,8 @@ func TestSetTest(t *testing.T) {
 			origin := tool
 			defer func() { tool = origin }()
 
-			if got := SetTest(tt.args.test); got.Test != tt.want.Test {
-				t.Errorf("SetTest() = %v, want %v", got.Test, tt.want.Test)
-			}
-		})
-	}
-}
-
-func TestWrite(t *testing.T) {
-	type args struct {
-		test  *FakeTest
-		tar   target
-		bytes []byte
-	}
-	type stat struct {
-		fileInfo *FakeStat
-		error    error
-	}
-	tests := []struct {
-		name      string
-		args      args
-		writeFile error
-		stat      stat
-		recover   bool
-	}{
-		{
-			name: "write-nil",
-			args: args{
-				test:  new(FakeTest),
-				tar:   Golden,
-				bytes: nil,
-			},
-			stat: stat{
-				error: os.ErrNotExist,
-			},
-			recover: false,
-		},
-		{
-			name: "write-nil-with-file-exist",
-			args: args{
-				test:  new(FakeTest),
-				tar:   Golden,
-				bytes: nil,
-			},
-			stat: stat{
-				fileInfo: new(FakeStat),
-			},
-			recover: false,
-		},
-		{
-			name: "write-empty",
-			args: args{
-				test:  new(FakeTest),
-				tar:   Golden,
-				bytes: []byte{},
-			},
-			stat: stat{
-				fileInfo: new(FakeStat),
-			},
-			recover: false,
-		},
-		{
-			name: "write-bytes",
-			args: args{
-				test:  new(FakeTest),
-				tar:   Golden,
-				bytes: []byte("golden"),
-			},
-			stat: stat{
-				fileInfo: &FakeStat{isDir: true},
-			},
-			recover: false,
-		},
-		{
-			name: "fatality-error",
-			args: args{
-				test:  new(FakeTest),
-				tar:   Golden,
-				bytes: []byte("golden"),
-			},
-			stat: stat{
-				error: os.ErrPermission,
-			},
-			recover: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			origin := tool
-			defer func() { tool = origin }()
-
-			tool.writeFile = func(filename string, data []byte, perm os.FileMode) error {
-				t.Logf(`os.WriteFile(%q, %q, %d)`, filename, data, perm)
-				helper.SetTest(t).compare(data, tt.args.bytes)
-				if data == nil {
-					t.Errorf("you cannot write nil values to a file")
-				}
-				return tt.writeFile
-			}
-			tool.mkdirAll = func(path string, perm os.FileMode) error {
-				t.Logf(`os.MkdirAll(%q, %d) `, path, perm)
-				return nil
-			}
-			tool.remove = func(name string) error {
-				t.Logf(`os.Remove(%q)`, name)
-				return nil
-			}
-			tool.stat = func(name string) (os.FileInfo, error) {
-				t.Logf(`os.Stat(%q)`, name)
-				if tt.stat.fileInfo != nil {
-					tt.stat.fileInfo.name = name
-				}
-				return tt.stat.fileInfo, tt.stat.error
-			}
-			{
-				defer func() {
-					if r := recover(); (r == nil) == tt.recover {
-						t.Error(r)
-					}
-					tt.args.test.Assert(t)
-				}()
-				tt.args.test.name = t.Name()
-				Write(tt.args.test, tt.args.tar, tt.args.bytes)
+			if got := SetTest(tt.args.test); got.test != tt.want.test {
+				t.Errorf("SetTest() = %v, want %v", got.test, tt.want.test)
 			}
 		})
 	}
@@ -487,44 +359,57 @@ func TestTool_Assert(t *testing.T) {
 	}
 }
 
-func TestTool_Path(t *testing.T) {
+func TestTool_path(t *testing.T) {
 	tests := []struct {
 		name     string
 		tool     Tool
 		wantPath string
 	}{
 		{
-			name:     "initial",
-			tool:     Tool{},
-			wantPath: "TestTool_Path/initial.",
+			name: "empty",
+			tool: Tool{},
 		},
 		{
-			name:     "input-target-path",
-			tool:     tool.SetTarget(Input),
-			wantPath: "testdata/TestTool_Path/input-target-path.input",
+			name: "default",
+			tool: tool,
 		},
 		{
-			name:     "golden-target-path",
-			tool:     tool.SetTarget(Golden),
-			wantPath: "testdata/TestTool_Path/golden-target-path.golden",
+			name: "path-index-0-target-input",
+			tool: tool.SetIndex(0).SetTarget(Input),
 		},
 		{
-			name:     "default-target-path",
-			tool:     tool.SetTarget(0),
-			wantPath: "testdata/TestTool_Path/default-target-path.input",
+			name: "path-index-1-target-input",
+			tool: tool.SetIndex(1).SetTarget(Input),
 		},
 		{
-			name:     "set-index-path",
-			tool:     tool.SetIndex(1).SetTarget(Golden),
-			wantPath: "testdata/TestTool_Path/set-index-path.001.golden",
+			name: "path-index-0-target-golden",
+			tool: tool.SetIndex(0).SetTarget(Golden),
+		},
+		{
+			name: "path-index-1-target-golden",
+			tool: tool.SetIndex(1).SetTarget(Golden),
+		},
+		{
+			name: "path-index-0-target-input-prefix-gold",
+			tool: tool.SetIndex(0).SetTarget(Input).SetPrefix("gold"),
+		},
+		{
+			name: "path-index-1-target-input-prefix-gold",
+			tool: tool.SetIndex(1).SetTarget(Input).SetPrefix("gold"),
+		},
+		{
+			name: "path-index-0-target-golden-prefix-gold",
+			tool: tool.SetIndex(0).SetTarget(Golden).SetPrefix("gold"),
+		},
+		{
+			name: "path-index-1-target-golden-prefix-gold",
+			tool: tool.SetIndex(1).SetTarget(Golden).SetPrefix("gold"),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.tool.Test = &FakeTest{name: t.Name()}
-			if gotPath := tt.tool.Path(); gotPath != tt.wantPath {
-				t.Errorf("Tool.Path() = %v, want %v", gotPath, tt.wantPath)
-			}
+			test := &FakeTest{name: t.Name()}
+			helper.SetTest(t).Assert([]byte(tt.tool.SetTest(test).path()))
 		})
 	}
 }
@@ -657,35 +542,6 @@ func TestTool_Run(t *testing.T) {
 	}
 }
 
-func TestTool_SetDir(t *testing.T) {
-	type args struct {
-		dir string
-	}
-	tests := []struct {
-		name string
-		tool Tool
-		args args
-		want Tool
-	}{
-		{
-			name: "golden",
-			args: args{
-				dir: "golden",
-			},
-			want: Tool{
-				Dir: "golden",
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.tool.SetDir(tt.args.dir); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Tool.SetDir() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestTool_SetIndex(t *testing.T) {
 	type args struct {
 		index uint8
@@ -702,7 +558,7 @@ func TestTool_SetIndex(t *testing.T) {
 				index: 1,
 			},
 			want: Tool{
-				Index: 1,
+				index: 1,
 			},
 		},
 	}
@@ -731,7 +587,7 @@ func TestTool_SetTarget(t *testing.T) {
 				tar: Input,
 			},
 			want: Tool{
-				Target: Input,
+				target: Input,
 			},
 		},
 	}
@@ -766,7 +622,7 @@ func TestTool_SetTest(t *testing.T) {
 			args: args{
 				t: t,
 			},
-			want: Tool{Test: t},
+			want: Tool{test: t},
 		},
 	}
 	for _, tt := range tests {
@@ -797,21 +653,21 @@ func TestTool_Update(t *testing.T) {
 	}{
 		{
 			name: "not-update-with-nil",
-			tool: Tool{UpdateFlag: nil},
+			tool: Tool{flag: nil},
 			args: args{
 				[]byte("golden"),
 			},
 		},
 		{
 			name: "not-update-with-false",
-			tool: Tool{UpdateFlag: &fal},
+			tool: Tool{flag: &fal},
 			args: args{
 				[]byte("golden"),
 			},
 		},
 		{
 			name: "update-with-true",
-			tool: Tool{UpdateFlag: &tru},
+			tool: Tool{flag: &tru},
 			args: args{
 				[]byte("golden"),
 			},
@@ -843,7 +699,7 @@ func TestTool_Update(t *testing.T) {
 	}
 }
 
-func TestTool_Write(t *testing.T) {
+func TestTool_write(t *testing.T) {
 	type args struct {
 		test  *FakeTest
 		tar   target
@@ -958,7 +814,7 @@ func TestTool_Write(t *testing.T) {
 				}()
 				tt.tool.SetTest(tt.args.test).
 					SetTarget(tt.args.tar).
-					Write(tt.args.bytes)
+					write(tt.args.bytes)
 			}
 		})
 	}
@@ -1045,7 +901,7 @@ func TestTool_mkdir(t *testing.T) {
 		{
 			name: "fatality-error",
 			args: args{
-				loc: tool.SetTest(t).Path(),
+				loc: tool.SetTest(t).path(),
 			},
 			stat: stat{
 				error: os.ErrPermission,
@@ -1055,7 +911,7 @@ func TestTool_mkdir(t *testing.T) {
 		{
 			name: "error-file-does-not-exist",
 			args: args{
-				loc: tool.SetTest(t).Path(),
+				loc: tool.SetTest(t).path(),
 			},
 			stat: stat{
 				error: os.ErrNotExist,
@@ -1065,7 +921,7 @@ func TestTool_mkdir(t *testing.T) {
 		{
 			name: "error-dir-is-a-file",
 			args: args{
-				loc: tool.SetTest(t).Path(),
+				loc: tool.SetTest(t).path(),
 			},
 			stat: stat{
 				fileInfo: new(FakeStat),

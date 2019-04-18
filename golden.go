@@ -37,15 +37,16 @@ type tb interface {
 // on the basis of the state or change any parameter by creating
 // a new copy of the state.
 type Tool struct {
-	Test       tb
-	Dir        string
-	FileMode   os.FileMode
-	Index      uint8
-	InpExt     string
-	ModeDir    os.FileMode
-	OutExt     string
-	Target     target
-	UpdateFlag *bool
+	test     tb
+	dir      string
+	fileMode os.FileMode
+	index    uint8
+	inpExt   string
+	modeDir  os.FileMode
+	outExt   string
+	target   target
+	flag     *bool
+	prefix   string
 
 	mkdirAll  func(path string, perm os.FileMode) error
 	readFile  func(filename string) ([]byte, error)
@@ -58,12 +59,15 @@ type Tool struct {
 // functions that provide a simplified api for convenient interaction
 // with the functionality of the package.
 var tool = Tool{
-	Dir:      "testdata",
-	OutExt:   "golden",
-	InpExt:   "input",
-	FileMode: 0644,
-	ModeDir:  0755,
-	Target:   Golden,
+	// dir testdata is the directory for test data already accepted
+	// in the standard library which is also ignored by standard
+	// go tools and should not change in your tests.
+	dir:      "testdata",
+	outExt:   "golden",
+	inpExt:   "input",
+	fileMode: 0644,
+	modeDir:  0755,
+	target:   Golden,
 
 	mkdirAll:  os.MkdirAll,
 	readFile:  ioutil.ReadFile,
@@ -73,7 +77,7 @@ var tool = Tool{
 }
 
 func init() {
-	tool.UpdateFlag = flag.Bool("update", false, "update test golden files")
+	tool.flag = flag.Bool("update", false, "update test golden files")
 }
 
 // Assert is a tool to compare the actual value obtained in the test and
@@ -86,7 +90,7 @@ func Assert(t tb, got []byte) {
 // Read is a functional for reading both input and golden files using
 // the appropriate target.
 func Read(t tb, tar target) []byte {
-	return tool.SetTarget(tar).SetTest(t).Read()
+	return tool.SetTest(t).SetTarget(tar).Read()
 }
 
 // Run is a functional that automates the process of reading the input file
@@ -102,47 +106,12 @@ func SetTest(t tb) Tool {
 	return tool.SetTest(t)
 }
 
-// Write is a functional for writing both input and golden files using
-// the appropriate target.
-func Write(t tb, tar target, bs []byte) {
-	tool.SetTarget(tar).SetTest(t).Write(bs)
-}
-
 // Assert is a tool to compare the actual value obtained in the test and
 // the value from the golden file. Also built-in functionality for
 // updating golden files using the command line flag.
 func (tool Tool) Assert(got []byte) {
 	tool.Update(got)
-	tool.compare(tool.SetTarget(Golden).Read(), got)
-}
-
-// Path is getter to get the path to the file containing the test data.
-func (tool Tool) Path() (path string) {
-	ext := tool.OutExt
-	if tool.Target == Input {
-		ext = tool.InpExt
-	}
-
-	if tool.Index == 0 {
-		return filepath.Join(
-			tool.Dir,
-			fmt.Sprintf(
-				"%s.%s",
-				tool.Test.Name(),
-				ext,
-			),
-		)
-	}
-
-	return filepath.Join(
-		tool.Dir,
-		fmt.Sprintf(
-			"%s.%03d.%s",
-			tool.Test.Name(),
-			tool.Index,
-			ext,
-		),
-	)
+	tool.compare(got, tool.SetTarget(Golden).Read())
 }
 
 // Read is a functional for reading both input and golden files using
@@ -150,12 +119,12 @@ func (tool Tool) Path() (path string) {
 func (tool Tool) Read() (bs []byte) {
 	const f = "golden: read the value of nil since it is not found file: %s"
 
-	bs, err := tool.readFile(tool.Path())
+	bs, err := tool.readFile(tool.path())
 	if os.IsNotExist(err) {
-		tool.Test.Logf(f, tool.Path())
+		tool.test.Logf(f, tool.path())
 		return nil
 	} else if err != nil {
-		tool.Test.Fatalf("golden: %s", err)
+		tool.test.Fatalf("golden: %s", err)
 	}
 
 	return bs
@@ -170,59 +139,61 @@ func (tool Tool) Run(do func(input []byte) (got []byte, err error)) {
 	tool.Assert(bs)
 }
 
-// SetDir a dir value setter.
-func (tool Tool) SetDir(dir string) Tool {
-	tool.Dir = dir
+// SetIndex a index value setter.
+// DEPRECATED: Now you need to use SetPrefix method.
+func (tool Tool) SetIndex(index uint8) Tool {
+	tool.index = index
 	return tool
 }
 
-// SetIndex a index value setter.
-func (tool Tool) SetIndex(index uint8) Tool {
-	tool.Index = index
+// SetPrefix a prefix value setter.
+func (tool Tool) SetPrefix(prefix string) Tool {
+	tool.prefix = prefix
 	return tool
 }
 
 // SetTarget a target value setter.
 func (tool Tool) SetTarget(tar target) Tool {
-	tool.Target = tar
+	tool.target = tar
 	return tool
 }
 
-// SetTest a test value setter.
+// SetTest a test value setter in the call chain must be used first
+// to prevent abnormal situations when using other methods.
 func (tool Tool) SetTest(t tb) Tool {
-	tool.Test = t
+	tool.test = t
 	return tool
 }
 
 // Update functional reviewer is the need to update the golden files
 // and doing it.
 func (tool Tool) Update(bs []byte) {
-	if tool.UpdateFlag == nil || !*tool.UpdateFlag {
+	if tool.flag == nil || !*tool.flag {
 		return
 	}
 
-	tool.Test.Logf("golden: updating file: %s", tool.Path())
-	tool.Write(bs)
+	tool.test.Logf("golden: updating file: %s", tool.path())
+	tool.write(bs)
 }
 
-// Write is a functional for writing both input and golden files using
+// write is a functional for writing both input and golden files using
 // the appropriate target.
-func (tool Tool) Write(bs []byte) {
-	path := tool.Path()
+func (tool Tool) write(bs []byte) {
+	path := tool.path()
 	tool.mkdir(filepath.Dir(path))
-	tool.Test.Logf("golden: start write to file: %s", path)
+	tool.test.Logf("golden: start write to file: %s", path)
 	if bs == nil {
-		tool.Test.Logf("golden: nil value will not be written")
+		tool.test.Logf("golden: nil value will not be written")
 		fileInfo, err := tool.stat(path)
 		if err == nil && !fileInfo.IsDir() {
-			tool.Test.Logf("golden: current test bytes file will be deleted")
+			tool.test.Logf("golden: current test bytes file will be deleted")
 			tool.ok(tool.remove(path))
 		}
 		if !os.IsNotExist(err) {
 			tool.ok(err)
 		}
 	} else {
-		tool.ok(tool.writeFile(path, bs, tool.FileMode))
+		tool.ok(tool.writeFile(path, bs, tool.fileMode))
 	}
 }
 
@@ -234,7 +205,7 @@ func (tool Tool) compare(got, want []byte) {
 			format = "golden: compare error got = %q, want %q"
 		}
 
-		tool.Test.Fatalf(format, got, want)
+		tool.test.Fatalf(format, got, want)
 	}
 }
 
@@ -243,9 +214,9 @@ func (tool Tool) mkdir(loc string) {
 	fileInfo, err := tool.stat(loc)
 	switch {
 	case err != nil && os.IsNotExist(err):
-		err = tool.mkdirAll(loc, tool.ModeDir)
+		err = tool.mkdirAll(loc, tool.modeDir)
 	case err == nil && !fileInfo.IsDir():
-		tool.Test.Errorf("golden: test dir is a file: %s", loc)
+		tool.test.Errorf("golden: test dir is a file: %s", loc)
 	}
 
 	tool.ok(err)
@@ -254,6 +225,32 @@ func (tool Tool) mkdir(loc string) {
 // ok fails the test if an err is not nil.
 func (tool Tool) ok(err error) {
 	if err != nil {
-		tool.Test.Fatalf("golden: %s", err)
+		tool.test.Fatalf("golden: %s", err)
 	}
+}
+
+// path is getter to get the path to the file containing the test data.
+func (tool Tool) path() (path string) {
+	ext := tool.outExt
+	if tool.target == Input {
+		ext = tool.inpExt
+	}
+
+	s := fmt.Sprintf("%s.%s", tool.test.Name(), ext)
+	switch {
+	case tool.prefix != "" && tool.index > 0:
+		s = fmt.Sprintf(
+			"%s.%s.%03d.%s",
+			tool.test.Name(),
+			tool.prefix,
+			tool.index,
+			ext,
+		)
+	case tool.prefix != "":
+		s = fmt.Sprintf("%s.%s.%s", tool.test.Name(), tool.prefix, ext)
+	case tool.index > 0:
+		s = fmt.Sprintf("%s.%03d.%s", tool.test.Name(), tool.index, ext)
+	}
+
+	return filepath.Join(tool.dir, s)
 }

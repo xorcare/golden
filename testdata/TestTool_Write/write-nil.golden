@@ -1,6 +1,0 @@
-{
-	"logs": [
-		"golden: start write to file: TestTool_Write/write-nil.",
-		"golden: nil value will not be written"
-	]
-}
