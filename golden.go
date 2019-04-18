@@ -140,6 +140,7 @@ func (tool Tool) Run(do func(input []byte) (got []byte, err error)) {
 }
 
 // SetIndex a index value setter.
+// DEPRECATED: Now you need to use SetPrefix method.
 func (tool Tool) SetIndex(index uint8) Tool {
 	tool.index = index
 	return tool
