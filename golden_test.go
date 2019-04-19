@@ -1033,6 +1033,9 @@ func (m *FakeTest) Assert(t tb) {
 	if err != nil {
 		t.Fatalf("FakeTest.Assert() failed json.Marshal(%#v), error: %v", m, err)
 	}
+	if bytes.Equal(jsonBytes, []byte("{}")) || len(jsonBytes) == 0 {
+		jsonBytes = nil
+	}
 	helper.SetTest(t).Assert(jsonBytes)
 }
 
