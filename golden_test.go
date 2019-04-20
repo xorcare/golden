@@ -95,16 +95,14 @@ func TestAssert(t *testing.T) {
 				t.Logf(`os.ReadFile(%q) `, filename)
 				return tt.readFile.bytes, tt.readFile.error
 			}
-			{
-				defer func() {
-					if r := recover(); (r == nil) == tt.recover {
-						t.Error(r)
-					}
-					tt.args.test.Assert(t)
-				}()
-				tt.args.test.name = t.Name()
-				Assert(tt.args.test, tt.args.got)
-			}
+			defer func() {
+				if r := recover(); (r == nil) == tt.recover {
+					t.Error(r)
+				}
+				tt.args.test.Assert(t)
+			}()
+			tt.args.test.name = t.Name()
+			Assert(tt.args.test, tt.args.got)
 		})
 	}
 }
@@ -174,18 +172,16 @@ func TestRead(t *testing.T) {
 				t.Logf(`os.ReadFile(%q) `, filename)
 				return tt.readFile.bytes, tt.readFile.error
 			}
-			{
-				defer func() {
-					if r := recover(); (r == nil) == tt.recover {
-						t.Error(r)
-					}
-					tt.args.test.Assert(t)
-				}()
-				tt.args.test.name = t.Name()
-				got := Read(tt.args.test, tt.args.tar)
-				if !bytes.Equal(got, tt.want) {
-					t.Errorf("Read() = %v, want %v", got, tt.want)
+			defer func() {
+				if r := recover(); (r == nil) == tt.recover {
+					t.Error(r)
 				}
+				tt.args.test.Assert(t)
+			}()
+			tt.args.test.name = t.Name()
+			got := Read(tt.args.test, tt.args.tar)
+			if !bytes.Equal(got, tt.want) {
+				t.Errorf("Read() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -231,16 +227,14 @@ func TestRun(t *testing.T) {
 				t.Logf(`os.ReadFile(%q)`, filename)
 				return nil, nil
 			}
-			{
-				defer func() {
-					if r := recover(); (r == nil) == tt.recover {
-						t.Error(r)
-					}
-					tt.args.test.Assert(t)
-				}()
-				tt.args.test.name = t.Name()
-				Run(tt.args.test, tt.args.do)
-			}
+			defer func() {
+				if r := recover(); (r == nil) == tt.recover {
+					t.Error(r)
+				}
+				tt.args.test.Assert(t)
+			}()
+			tt.args.test.name = t.Name()
+			Run(tt.args.test, tt.args.do)
 		})
 	}
 }
@@ -345,16 +339,15 @@ func TestTool_Assert(t *testing.T) {
 				t.Logf(`os.ReadFile(%q) `, filename)
 				return tt.readFile.bytes, tt.readFile.error
 			}
-			{
-				defer func() {
-					if r := recover(); (r == nil) == tt.recover {
-						t.Error(r)
-					}
-					tt.test.Assert(t)
-				}()
-				tt.test.name = t.Name()
-				tt.tool.SetTest(&tt.test).Assert(tt.args.got)
-			}
+			defer func() {
+				if r := recover(); (r == nil) == tt.recover {
+					t.Error(r)
+				}
+				tt.test.Assert(t)
+			}()
+			tt.test.name = t.Name()
+			tt.tool.SetTest(&tt.test).Assert(tt.args.got)
+
 		})
 	}
 }
@@ -478,17 +471,15 @@ func TestTool_Read(t *testing.T) {
 				t.Logf(`os.ReadFile(%q) `, filename)
 				return tt.readFile.bytes, tt.readFile.error
 			}
-			{
-				defer func() {
-					if r := recover(); (r == nil) == tt.recover {
-						t.Error(r)
-					}
-					tt.args.test.Assert(t)
-				}()
-				got := tt.tool.SetTest(tt.args.test).SetTarget(tt.args.tar).Read()
-				if !bytes.Equal(got, tt.want) {
-					t.Errorf("Read() = %v, want %v", got, tt.want)
+			defer func() {
+				if r := recover(); (r == nil) == tt.recover {
+					t.Error(r)
 				}
+				tt.args.test.Assert(t)
+			}()
+			got := tt.tool.SetTest(tt.args.test).SetTarget(tt.args.tar).Read()
+			if !bytes.Equal(got, tt.want) {
+				t.Errorf("Read() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -529,15 +520,14 @@ func TestTool_Run(t *testing.T) {
 				t.Logf(`os.ReadFile(%q)`, filename)
 				return nil, nil
 			}
-			{
-				defer func() {
-					if r := recover(); (r == nil) == tt.recover {
-						t.Error(r)
-					}
-					tt.test.Assert(t)
-				}()
-				tt.tool.SetTest(&tt.test).Run(tt.args.do)
-			}
+			defer func() {
+				if r := recover(); (r == nil) == tt.recover {
+					t.Error(r)
+				}
+				tt.test.Assert(t)
+			}()
+			tt.tool.SetTest(&tt.test).Run(tt.args.do)
+
 		})
 	}
 }
@@ -805,17 +795,15 @@ func TestTool_write(t *testing.T) {
 				}
 				return tt.stat.fileInfo, tt.stat.error
 			}
-			{
-				defer func() {
-					if r := recover(); (r == nil) == tt.recover {
-						t.Error(r)
-					}
-					tt.args.test.Assert(t)
-				}()
-				tt.tool.SetTest(tt.args.test).
-					SetTarget(tt.args.tar).
-					write(tt.args.bytes)
-			}
+			defer func() {
+				if r := recover(); (r == nil) == tt.recover {
+					t.Error(r)
+				}
+				tt.args.test.Assert(t)
+			}()
+			tt.tool.SetTest(tt.args.test).
+				SetTarget(tt.args.tar).
+				write(tt.args.bytes)
 		})
 	}
 }
@@ -867,16 +855,14 @@ func TestTool_compare(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			{
-				defer func() {
-					if r := recover(); (r == nil) == tt.recover {
-						t.Error(r)
-					}
-					tt.test.Assert(t)
-				}()
-				tt.test.name = t.Name()
-				tt.tool.SetTest(&tt.test).compare(tt.args.got, tt.args.want)
-			}
+			defer func() {
+				if r := recover(); (r == nil) == tt.recover {
+					t.Error(r)
+				}
+				tt.test.Assert(t)
+			}()
+			tt.test.name = t.Name()
+			tt.tool.SetTest(&tt.test).compare(tt.args.got, tt.args.want)
 		})
 	}
 }
@@ -943,16 +929,14 @@ func TestTool_mkdir(t *testing.T) {
 				}
 				return tt.stat.fileInfo, tt.stat.error
 			}
-			{
-				defer func() {
-					if r := recover(); (r == nil) == tt.recover {
-						t.Error(r)
-					}
-					tt.test.Assert(t)
-				}()
-				tt.test.name = t.Name()
-				tt.tool.SetTest(&tt.test).mkdir(tt.args.loc)
-			}
+			defer func() {
+				if r := recover(); (r == nil) == tt.recover {
+					t.Error(r)
+				}
+				tt.test.Assert(t)
+			}()
+			tt.test.name = t.Name()
+			tt.tool.SetTest(&tt.test).mkdir(tt.args.loc)
 		})
 	}
 }
@@ -985,16 +969,14 @@ func TestTool_ok(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			{
-				defer func() {
-					if r := recover(); (r == nil) == tt.recover {
-						t.Error(r)
-					}
-					tt.test.Assert(t)
-				}()
-				tt.test.name = t.Name()
-				tt.tool.SetTest(&tt.test).ok(tt.args.err)
-			}
+			defer func() {
+				if r := recover(); (r == nil) == tt.recover {
+					t.Error(r)
+				}
+				tt.test.Assert(t)
+			}()
+			tt.test.name = t.Name()
+			tt.tool.SetTest(&tt.test).ok(tt.args.err)
 		})
 	}
 }
