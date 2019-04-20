@@ -170,6 +170,7 @@ func TestRead(t *testing.T) {
 
 			tool.readFile = func(filename string) (bytes []byte, e error) {
 				t.Logf(`os.ReadFile(%q) `, filename)
+				helper.SetTest(t).SetPrefix("filename").Assert([]byte(filename))
 				return tt.readFile.bytes, tt.readFile.error
 			}
 			defer func() {
