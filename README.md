@@ -63,7 +63,7 @@ your own codebase, such as reading from an input file.
 
 ```go
 func TestDecode(t *testing.T) {
-    input := string(golden.Read(t, golden.Input))
+    input := string(golden.Read(t))
     got, err := base64.RawURLEncoding.DecodeString(input)
     if err != nil {
         t.Fatal(err)

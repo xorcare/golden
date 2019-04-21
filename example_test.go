@@ -48,7 +48,7 @@ func ExampleRun() {
 //
 // The test name is assumed to be equal to ExampleRead.
 func ExampleRead() {
-	input := string(golden.Read(t, golden.Input))
+	input := string(golden.Read(t))
 	got, err := base64.RawURLEncoding.DecodeString(input)
 	if err != nil {
 		t.Fatal(err)

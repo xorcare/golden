@@ -110,7 +110,6 @@ func TestAssert(t *testing.T) {
 func TestRead(t *testing.T) {
 	type args struct {
 		test *FakeTest
-		tar  target
 	}
 	type readFile struct {
 		error error
@@ -128,7 +127,6 @@ func TestRead(t *testing.T) {
 			want: []byte("golden"),
 			args: args{
 				test: new(FakeTest),
-				tar:  Golden,
 			},
 			readFile: readFile{
 				bytes: []byte("golden"),
@@ -141,7 +139,6 @@ func TestRead(t *testing.T) {
 			want: nil,
 			args: args{
 				test: new(FakeTest),
-				tar:  Golden,
 			},
 			readFile: readFile{
 				bytes: nil,
@@ -154,7 +151,6 @@ func TestRead(t *testing.T) {
 			want: nil,
 			args: args{
 				test: new(FakeTest),
-				tar:  Golden,
 			},
 			readFile: readFile{
 				bytes: nil,
@@ -180,7 +176,7 @@ func TestRead(t *testing.T) {
 				tt.args.test.Assert(t)
 			}()
 			tt.args.test.name = t.Name()
-			got := Read(tt.args.test, tt.args.tar)
+			got := Read(tt.args.test)
 			if !bytes.Equal(got, tt.want) {
 				t.Errorf("Read() = %v, want %v", got, tt.want)
 			}

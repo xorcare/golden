@@ -1,1 +1,1 @@
-testdata/TestRead/error-reading-file-permission-denied.golden
+testdata/TestRead/error-reading-file-permission-denied.input

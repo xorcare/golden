@@ -89,8 +89,8 @@ func Assert(t tb, got []byte) {
 
 // Read is a functional for reading both input and golden files using
 // the appropriate target.
-func Read(t tb, tar target) []byte {
-	return tool.SetTest(t).SetTarget(tar).Read()
+func Read(t tb) []byte {
+	return tool.SetTest(t).SetTarget(Input).Read()
 }
 
 // Run is a functional that automates the process of reading the input file
