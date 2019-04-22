@@ -364,36 +364,20 @@ func TestTool_path(t *testing.T) {
 			tool: tool,
 		},
 		{
-			name: "path-index-0-target-input",
-			tool: tool.SetIndex(0).SetTarget(Input),
+			name: "path-target-input",
+			tool: tool.SetTarget(Input),
 		},
 		{
-			name: "path-index-1-target-input",
-			tool: tool.SetIndex(1).SetTarget(Input),
+			name: "path-target-golden",
+			tool: tool.SetTarget(Golden),
 		},
 		{
-			name: "path-index-0-target-golden",
-			tool: tool.SetIndex(0).SetTarget(Golden),
+			name: "path-target-input-prefix-gold",
+			tool: tool.SetTarget(Input).SetPrefix("gold"),
 		},
 		{
-			name: "path-index-1-target-golden",
-			tool: tool.SetIndex(1).SetTarget(Golden),
-		},
-		{
-			name: "path-index-0-target-input-prefix-gold",
-			tool: tool.SetIndex(0).SetTarget(Input).SetPrefix("gold"),
-		},
-		{
-			name: "path-index-1-target-input-prefix-gold",
-			tool: tool.SetIndex(1).SetTarget(Input).SetPrefix("gold"),
-		},
-		{
-			name: "path-index-0-target-golden-prefix-gold",
-			tool: tool.SetIndex(0).SetTarget(Golden).SetPrefix("gold"),
-		},
-		{
-			name: "path-index-1-target-golden-prefix-gold",
-			tool: tool.SetIndex(1).SetTarget(Golden).SetPrefix("gold"),
+			name: "path-target-golden-prefix-gold",
+			tool: tool.SetTarget(Golden).SetPrefix("gold"),
 		},
 	}
 	for _, tt := range tests {
@@ -525,35 +509,6 @@ func TestTool_Run(t *testing.T) {
 			}()
 			tt.tool.SetTest(&tt.test).Run(tt.args.do)
 
-		})
-	}
-}
-
-func TestTool_SetIndex(t *testing.T) {
-	type args struct {
-		index uint8
-	}
-	tests := []struct {
-		name string
-		tool Tool
-		args args
-		want Tool
-	}{
-		{
-			name: "set-one",
-			args: args{
-				index: 1,
-			},
-			want: Tool{
-				index: 1,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.tool.SetIndex(tt.args.index); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Tool.SetIndex() = %v, want %v", got, tt.want)
-			}
 		})
 	}
 }

@@ -40,7 +40,6 @@ type Tool struct {
 	test     tb
 	dir      string
 	fileMode os.FileMode
-	index    uint8
 	inpExt   string
 	modeDir  os.FileMode
 	outExt   string
@@ -139,13 +138,6 @@ func (tool Tool) Run(do func(input []byte) (got []byte, err error)) {
 	tool.Assert(bs)
 }
 
-// SetIndex a index value setter.
-// DEPRECATED: Now you need to use SetPrefix method.
-func (tool Tool) SetIndex(index uint8) Tool {
-	tool.index = index
-	return tool
-}
-
 // SetPrefix a prefix value setter.
 func (tool Tool) SetPrefix(prefix string) Tool {
 	tool.prefix = prefix
@@ -237,19 +229,8 @@ func (tool Tool) path() (path string) {
 	}
 
 	s := fmt.Sprintf("%s.%s", tool.test.Name(), ext)
-	switch {
-	case tool.prefix != "" && tool.index > 0:
-		s = fmt.Sprintf(
-			"%s.%s.%03d.%s",
-			tool.test.Name(),
-			tool.prefix,
-			tool.index,
-			ext,
-		)
-	case tool.prefix != "":
+	if tool.prefix != "" {
 		s = fmt.Sprintf("%s.%s.%s", tool.test.Name(), tool.prefix, ext)
-	case tool.index > 0:
-		s = fmt.Sprintf("%s.%03d.%s", tool.test.Name(), tool.index, ext)
 	}
 
 	return filepath.Join(tool.dir, s)
