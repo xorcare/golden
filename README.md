@@ -32,6 +32,14 @@ Golden files are placed in directory `testdata` this directory is ignored by
 the standard tools go, and it can accommodate a variety of data used in test or
 samples.
 
+## Installation
+
+To install Golden, use go get:
+
+```bash
+go get -u github.com/xorcare/golden
+```
+
 ## Examples
 
 **Using** `golden.Assert` - to check and save the data in the golden file.
