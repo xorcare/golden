@@ -14,25 +14,6 @@ NAMESPACE = github.com/xorcare/golden
 # to check code coverage.
 COVER_FILE ?= coverage.out
 
-# Maximum life time of the compiled tool in minutes.
-# This limitation is needed to periodically update
-# auxiliary tools and at the same time have a cache
-# to speed up statically checks and build.
-TOOL_LIFETIME ?= 60
-
-# The section contains installation instructions for auxiliary tools.
-GOLINT = $(GOPATH_BIN)/golint
-.PHONY: $(GOLINT)
-$(GOLINT):
-	@if [ $$(find $(GOLINT) -type f -maxdepth 0 -cmin -$(TOOL_LIFETIME) 2> /dev/null | wc -l) -eq 0 ]; \
-		then GO111MODULE=off go get -u golang.org/x/lint/golint; fi
-
-GOIMPORTS = $(GOPATH_BIN)/goimports
-.PHONY: $(GOIMPORTS)
-$(GOIMPORTS):
-	@if [ $$(find $(GOIMPORTS) -type f -maxdepth 0 -cmin -$(TOOL_LIFETIME) 2> /dev/null | wc -l) -eq 0 ]; \
-		then GO111MODULE=off go get -u golang.org/x/tools/cmd/goimports; fi
-
 # Main targets.
 .DEFAULT_GOAL := help
 
@@ -72,11 +53,11 @@ help: ## Print this help
 	awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: imports
-imports: $(GOIMPORTS) ## Check and fix import section by import rules
+imports: tools ## Check and fix import section by import rules
 	@test -z $$(for d in $$(go list -f {{.Dir}} ./...); do goimports -e -l -local $(NAMESPACE) -w $$d/*.go; done)
 
 .PHONY: lint
-lint: $(GOLINT) ## Check the project with lint
+lint: tools ## Check the project with lint
 	@golint -set_exit_status ./...
 
 .PHONY: static
@@ -99,8 +80,11 @@ testup: ## Run unit tests with golden files update
 
 .PHONY: tools
 tools: ## Install all needed tools, e.g. for static checks
-	@for tool in $(GOLINT) $(GOIMPORTS); \
-	do rm -f $$tool && $(MAKE) $$tool; done
+	@cd ./internal/tools && go generate install.go
+
+.PHONY: toolsup
+toolsup: ## Update all needed tools, e.g. for static checks
+	@cd ./internal/tools && go generate update.go
 
 .PHONY: vet
 vet: ## Check the project with vet
