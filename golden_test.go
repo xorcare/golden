@@ -238,7 +238,7 @@ func TestRun(t *testing.T) {
 
 func TestSetTest(t *testing.T) {
 	type args struct {
-		test tb
+		test TestingTB
 	}
 	m := new(FakeTest)
 	tests := []struct {
@@ -544,7 +544,7 @@ func TestTool_SetTarget(t *testing.T) {
 
 func TestTool_SetTest(t *testing.T) {
 	type args struct {
-		t tb
+		t TestingTB
 	}
 	tests := []struct {
 		name string
@@ -933,7 +933,7 @@ func TestTool_ok(t *testing.T) {
 	}
 }
 
-// FakeTest implements tb methods.
+// FakeTest implements TestingTB methods.
 type FakeTest struct {
 	name string
 	Errs []string `json:"errs,omitempty"`
@@ -941,7 +941,7 @@ type FakeTest struct {
 	Fats []string `json:"fats,omitempty"`
 }
 
-// tb interface methods.
+// TestingTB interface methods.
 
 func (m FakeTest) Name() string {
 	return m.name
@@ -962,7 +962,7 @@ func (m *FakeTest) Fatalf(format string, args ...interface{}) {
 
 // test control methods.
 
-func (m *FakeTest) Assert(t tb) {
+func (m *FakeTest) Assert(t TestingTB) {
 	jsonBytes, err := json.MarshalIndent(m, "", "\t")
 	if err != nil {
 		t.Fatalf("FakeTest.Assert() failed json.Marshal(%#v), error: %v", m, err)
