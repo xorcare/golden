@@ -23,8 +23,8 @@ const (
 	Golden
 )
 
-// tb is the interface common to T and B.
-type tb interface {
+// TestingTB is the interface common to T and B.
+type TestingTB interface {
 	Name() string
 	Logf(format string, args ...interface{})
 	Errorf(format string, args ...interface{})
@@ -37,7 +37,7 @@ type tb interface {
 // on the basis of the state or change any parameter by creating
 // a new copy of the state.
 type Tool struct {
-	test     tb
+	test     TestingTB
 	dir      string
 	fileMode os.FileMode
 	inpExt   string
@@ -82,26 +82,26 @@ func init() {
 // Assert is a tool to compare the actual value obtained in the test and
 // the value from the golden file. Also built-in functionality for
 // updating golden files using the command line flag.
-func Assert(t tb, got []byte) {
+func Assert(t TestingTB, got []byte) {
 	tool.SetTest(t).Assert(got)
 }
 
 // Read is a functional for reading both input and golden files using
 // the appropriate target.
-func Read(t tb) []byte {
+func Read(t TestingTB) []byte {
 	return tool.SetTest(t).SetTarget(Input).Read()
 }
 
 // Run is a functional that automates the process of reading the input file
 // of the test bytes and the execution of the input function of testing and
 // checking the results.
-func Run(t tb, do func(input []byte) (outcome []byte, err error)) {
+func Run(t TestingTB, do func(input []byte) (outcome []byte, err error)) {
 	tool.SetTest(t).Run(do)
 }
 
 // SetTest is a mechanism to create a new copy of the base Tool object for
 // advanced use. This method replaces the constructor for the Tool structure.
-func SetTest(t tb) Tool {
+func SetTest(t TestingTB) Tool {
 	return tool.SetTest(t)
 }
 
@@ -152,7 +152,7 @@ func (tool Tool) SetTarget(tar target) Tool {
 
 // SetTest a test value setter in the call chain must be used first
 // to prevent abnormal situations when using other methods.
-func (tool Tool) SetTest(t tb) Tool {
+func (tool Tool) SetTest(t TestingTB) Tool {
 	tool.test = t
 	return tool
 }
