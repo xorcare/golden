@@ -17,10 +17,10 @@ import (
 type target = uint
 
 const (
-	// Input file target.
-	Input target = iota
 	// Golden file target.
-	Golden
+	Golden target = iota
+	// Input file target.
+	Input
 )
 
 // TestingTB is the interface common to T and B.
