@@ -3,6 +3,6 @@
 		"golden: test dir is a file: TestTool_write"
 	],
 	"logs": [
-		"golden: start write to file: TestTool_write/write-empty."
+		"golden: start write to file: TestTool_write/write-empty.golden"
 	]
 }
