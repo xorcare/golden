@@ -14,13 +14,26 @@ import (
 	"unicode/utf8"
 )
 
-type target = uint
+type target uint
+
+func (t target) String() string {
+	switch t {
+	case Golden:
+		return "golden"
+	case Input:
+		return "input"
+	default:
+		panic(fmt.Sprintf("unsupported target: %d", t))
+	}
+}
 
 const (
 	// Golden file target.
 	Golden target = iota
 	// Input file target.
 	Input
+	// latest the maximum target used. Should not be used in your code.
+	latest
 )
 
 // TestingTB is the interface common to T and B.
@@ -62,8 +75,6 @@ var tool = Tool{
 	// in the standard library which is also ignored by standard
 	// go tools and should not change in your tests.
 	dir:      "testdata",
-	outExt:   "golden",
-	inpExt:   "input",
 	fileMode: 0644,
 	modeDir:  0755,
 	target:   Golden,
@@ -223,14 +234,9 @@ func (tool Tool) ok(err error) {
 
 // path is getter to get the path to the file containing the test data.
 func (tool Tool) path() (path string) {
-	ext := tool.outExt
-	if tool.target == Input {
-		ext = tool.inpExt
-	}
-
-	s := fmt.Sprintf("%s.%s", tool.test.Name(), ext)
+	s := fmt.Sprintf("%s.%s", tool.test.Name(), tool.target.String())
 	if tool.prefix != "" {
-		s = fmt.Sprintf("%s.%s.%s", tool.test.Name(), tool.prefix, ext)
+		s = fmt.Sprintf("%s.%s.%s", tool.test.Name(), tool.prefix, tool.target.String())
 	}
 
 	return filepath.Join(tool.dir, s)
