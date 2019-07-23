@@ -21,7 +21,7 @@ build: ## Build the project binary
 	@go build ./...
 
 .PHONY: check
-check: static test ## Check project with static checks and unit tests
+check: static test actual ## Check project with static checks and unit tests
 
 $(COVER_FILE):
 	@$(MAKE) test
@@ -91,3 +91,9 @@ toolsup: ## Update all needed tools, e.g. for static checks
 .PHONY: vet
 vet: ## Check the project with vet
 	@go vet ./...
+
+.PHONY: actual
+actual: ## Checking the relevance of dependencies, and tools. And also the absence of arbitrary changes when performing checks.
+	@$(MAKE) toolsup
+	@go mod tidy
+	@if [ -n "$(git diff)" ]; then echo "All relevant"; else git diff --exit-code; fi;
