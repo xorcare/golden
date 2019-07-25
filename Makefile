@@ -73,7 +73,7 @@ testup: ## Run unit tests with golden files update
 	@find . -type f -name '*.golden' -exec rm -f {} \;
 	@go test ./... -update
 
-CDTOOLS ?= cd testdata/tools &&
+CDTOOLS ?= cd internal/tools &&
 .PHONY: tools
 tools: ## Install all needed tools, e.g. for static checks
 	@$(CDTOOLS) go install golang.org/x/lint/golint
@@ -82,8 +82,8 @@ tools: ## Install all needed tools, e.g. for static checks
 .PHONY: toolsup
 toolsup: ## Update all needed tools, e.g. for static checks
 	@$(CDTOOLS) go mod tidy
-	@$(CDTOOLS) go get -u golang.org/x/lint/golint@latest
-	@$(CDTOOLS) go get -u golang.org/x/tools/cmd/goimports@latest
+	@$(CDTOOLS) go get golang.org/x/lint/golint@latest
+	@$(CDTOOLS) go get golang.org/x/tools/cmd/goimports@latest
 	@$(CDTOOLS) go mod download
 	@$(CDTOOLS) go mod verify
 	@$(MAKE) tools
