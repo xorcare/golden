@@ -1,5 +1,2 @@
-{
-	"fats": [
-		"golden: compare error got = \"golden\", want \"\""
-	]
-}
+=== FATS
+golden: compare error got = "golden", want ""

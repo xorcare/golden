@@ -6,10 +6,10 @@ package golden
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -99,7 +99,7 @@ func TestAssert(t *testing.T) {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				tt.args.test.Assert(t)
+				helper.SetTest(t).Assert(tt.args.test.Bytes())
 			}()
 			tt.args.test.name = t.Name()
 			Assert(tt.args.test, tt.args.got)
@@ -173,7 +173,7 @@ func TestRead(t *testing.T) {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				tt.args.test.Assert(t)
+				helper.SetTest(t).Assert(tt.args.test.Bytes())
 			}()
 			tt.args.test.name = t.Name()
 			got := Read(tt.args.test)
@@ -228,7 +228,7 @@ func TestRun(t *testing.T) {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				tt.args.test.Assert(t)
+				helper.SetTest(t).Assert(tt.args.test.Bytes())
 			}()
 			tt.args.test.name = t.Name()
 			Run(tt.args.test, tt.args.do)
@@ -340,7 +340,7 @@ func TestTool_Assert(t *testing.T) {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				tt.test.Assert(t)
+				helper.SetTest(t).Assert(tt.test.Bytes())
 			}()
 			tt.test.name = t.Name()
 			tt.tool.SetTest(&tt.test).Assert(tt.args.got)
@@ -456,7 +456,7 @@ func TestTool_Read(t *testing.T) {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				tt.args.test.Assert(t)
+				helper.SetTest(t).Assert(tt.args.test.Bytes())
 			}()
 			got := tt.tool.SetTest(tt.args.test).SetTarget(tt.args.tar).Read()
 			if !bytes.Equal(got, tt.want) {
@@ -505,7 +505,7 @@ func TestTool_Run(t *testing.T) {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				tt.test.Assert(t)
+				helper.SetTest(t).Assert(tt.test.Bytes())
 			}()
 			tt.tool.SetTest(&tt.test).Run(tt.args.do)
 
@@ -751,7 +751,7 @@ func TestTool_write(t *testing.T) {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				tt.args.test.Assert(t)
+				helper.SetTest(t).Assert(tt.args.test.Bytes())
 			}()
 			tt.tool.SetTest(tt.args.test).
 				SetTarget(tt.args.tar).
@@ -811,7 +811,7 @@ func TestTool_compare(t *testing.T) {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				tt.test.Assert(t)
+				helper.SetTest(t).Assert(tt.test.Bytes())
 			}()
 			tt.test.name = t.Name()
 			tt.tool.SetTest(&tt.test).compare(tt.args.got, tt.args.want)
@@ -885,7 +885,7 @@ func TestTool_mkdir(t *testing.T) {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				tt.test.Assert(t)
+				helper.SetTest(t).Assert(tt.test.Bytes())
 			}()
 			tt.test.name = t.Name()
 			tt.tool.SetTest(&tt.test).mkdir(tt.args.loc)
@@ -925,7 +925,7 @@ func TestTool_ok(t *testing.T) {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				tt.test.Assert(t)
+				helper.SetTest(t).Assert(tt.test.Bytes())
 			}()
 			tt.test.name = t.Name()
 			tt.tool.SetTest(&tt.test).ok(tt.args.err)
@@ -936,9 +936,9 @@ func TestTool_ok(t *testing.T) {
 // FakeTest implements TestingTB methods.
 type FakeTest struct {
 	name string
-	Errs []string `json:"errs,omitempty"`
-	Logs []string `json:"logs,omitempty"`
-	Fats []string `json:"fats,omitempty"`
+	errs []string
+	logs []string
+	fats []string
 }
 
 // TestingTB interface methods.
@@ -948,29 +948,40 @@ func (m FakeTest) Name() string {
 }
 
 func (m *FakeTest) Logf(format string, args ...interface{}) {
-	m.Logs = append(m.Logs, fmt.Sprintf(format, args...))
+	m.logs = append(m.logs, fmt.Sprintf(format, args...))
 }
 
 func (m *FakeTest) Errorf(format string, args ...interface{}) {
-	m.Errs = append(m.Errs, fmt.Sprintf(format, args...))
+	m.errs = append(m.errs, fmt.Sprintf(format, args...))
 }
 
 func (m *FakeTest) Fatalf(format string, args ...interface{}) {
-	m.Fats = append(m.Fats, fmt.Sprintf(format, args...))
+	m.fats = append(m.fats, fmt.Sprintf(format, args...))
 	panic(fmt.Sprintf(format, args...))
 }
 
 // test control methods.
 
-func (m *FakeTest) Assert(t TestingTB) {
-	jsonBytes, err := json.MarshalIndent(m, "", "\t")
-	if err != nil {
-		t.Fatalf("FakeTest.Assert() failed json.Marshal(%#v), error: %v", m, err)
+func (m *FakeTest) Bytes() (bs []byte) {
+	f := func(h string, lns []string) (bs []byte) {
+		if len(lns) == 0 {
+			return nil
+		}
+
+		bs = append(bs, []byte(fmt.Sprintf("=== %s\n", strings.ToUpper(h)))...)
+
+		for _, v := range lns {
+			bs = append(bs, []byte(fmt.Sprintf("%s\n", v))...)
+		}
+
+		return bs
 	}
-	if bytes.Equal(jsonBytes, []byte("{}")) || len(jsonBytes) == 0 {
-		jsonBytes = nil
-	}
-	helper.SetTest(t).Assert(jsonBytes)
+
+	bs = append(bs, f("Logs", m.logs)...)
+	bs = append(bs, f("Errs", m.errs)...)
+	bs = append(bs, f("Fats", m.fats)...)
+
+	return bs
 }
 
 // FakeStat implements os.FileInfo.
