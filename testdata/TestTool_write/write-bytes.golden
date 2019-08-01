@@ -1,5 +1,2 @@
-{
-	"logs": [
-		"golden: start write to file: TestTool_write/write-bytes.golden"
-	]
-}
+=== LOGS
+golden: start write to file: TestTool_write/write-bytes.golden
