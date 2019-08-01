@@ -1,6 +1,6 @@
 # tools
 
-This directory includes go.mod and go.sum which contain versions of the tools.
+This directory includes go.mod and go.sum, which contain versions of the tools.
 
 ## License
 
