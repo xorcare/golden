@@ -72,7 +72,7 @@ type Tool struct {
 // with the functionality of the package.
 var tool = Tool{
 	// dir testdata is the directory for test data already accepted
-	// in the standard library which is also ignored by standard
+	// in the standard library, which is also ignored by standard
 	// go tools and should not change in your tests.
 	dir:      "testdata",
 	fileMode: 0644,
@@ -91,7 +91,7 @@ func init() {
 }
 
 // Assert is a tool to compare the actual value obtained in the test and
-// the value from the golden file. Also built-in functionality for
+// the value from the golden file. Also, built-in functionality for
 // updating golden files using the command line flag.
 func Assert(t TestingTB, got []byte) {
 	tool.SetTest(t).Assert(got)
@@ -117,7 +117,7 @@ func SetTest(t TestingTB) Tool {
 }
 
 // Assert is a tool to compare the actual value obtained in the test and
-// the value from the golden file. Also built-in functionality for
+// the value from the golden file. Also, built-in functionality for
 // updating golden files using the command line flag.
 func (tool Tool) Assert(got []byte) {
 	tool.Update(got)

@@ -1,6 +1,6 @@
 # Based on https://git.io/fjkGc
 
-# The full path to the main package is used in the
+# The full path to the main package is use in the
 # imports tool to format imports correctly.
 NAMESPACE = github.com/xorcare/golden
 
@@ -27,7 +27,7 @@ $(COVER_FILE):
 	@$(MAKE) test
 
 .PHONY: cover
-cover: $(COVER_FILE) ## Output coverage in human readable form in html
+cover: $(COVER_FILE) ## Output coverage in human readable an HTML
 	@go tool cover -html=$(COVER_FILE)
 	@rm -f $(COVER_FILE)
 
@@ -93,6 +93,6 @@ vet: ## Check the project with vet
 	@go vet ./...
 
 .PHONY: actual
-actual: ## Checking the relevance of dependencies, and tools. And also the absence of arbitrary changes when performing checks.
+actual: ## Checking the relevance of dependencies, and tools. Also, the absence of arbitrary changes when performing checks.
 	@go mod tidy
 	@if [ -n "$(git diff)" ]; then echo "All relevant"; else git diff --exit-code; fi;
