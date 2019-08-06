@@ -15,6 +15,8 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type target uint
@@ -45,6 +47,8 @@ type TestingTB interface {
 	Logf(format string, args ...interface{})
 	Errorf(format string, args ...interface{})
 	Fatalf(format string, args ...interface{})
+	FailNow()
+	Fail()
 }
 
 type testingHelper interface {
@@ -135,6 +139,32 @@ func (tool Tool) Assert(got []byte) {
 		h.Helper()
 	}
 	tool.compare(got, tool.SetTarget(Golden).Read())
+}
+
+// Equal is a tool to compare the actual value obtained in the test and
+// the value from the golden file. Also, built-in functionality for
+// updating golden files using the command line flag.
+func (tool Tool) Equal(actual []byte) Conclusion {
+	tool.Update(actual)
+	if h, ok := tool.test.(testingHelper); ok {
+		h.Helper()
+	}
+
+	expected := tool.SetTarget(Golden).Read()
+
+	if expected == nil {
+		expected = []byte(fmt.Sprintf("%#v", expected))
+	}
+	if actual == nil {
+		actual = []byte(fmt.Sprintf("%#v", actual))
+	}
+
+	i := new(interceptor)
+	c := newConclusion(tool.test)
+	c.successful = assert.Equal(i, string(expected), string(actual))
+	c.diff = i
+
+	return c
 }
 
 // Read is a functional for reading both input and golden files using

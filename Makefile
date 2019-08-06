@@ -56,7 +56,7 @@ imports: tools ## Check and fix import section by import rules
 
 .PHONY: lint
 lint: tools ## Check the project with lint
-	@golint -set_exit_status ./...
+	@go list ./... | grep -v /vendor/ | xargs -L1 golint -set_exit_status
 
 .PHONY: static
 static: fmt imports vet lint ## Run static checks (fmt, lint, imports, vet, ...) all over the project

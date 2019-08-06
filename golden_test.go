@@ -11,6 +11,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var helper = tool
@@ -1059,5 +1061,108 @@ func Test_rewrite(t *testing.T) {
 				t.Errorf("rewrite() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestTool_Equal(t *testing.T) {
+	type args struct {
+	}
+	tests := []struct {
+		name     string
+		args     args
+		actual   []byte
+		expected []byte
+		failed   bool
+	}{
+		{
+			name:     "successful nil-nil",
+			expected: nil,
+			actual:   nil,
+			failed:   false,
+		},
+		{
+			name:     "successful []-[]",
+			expected: []byte{},
+			actual:   []byte{},
+			failed:   false,
+		},
+		{
+			name:     "successful golden-golden",
+			expected: []byte("golden"),
+			actual:   []byte("golden"),
+			failed:   false,
+		},
+		{
+			name:     "failure golden-Z29sZGVu",
+			expected: []byte("golden"),
+			actual:   []byte("Z29sZGVu"),
+			failed:   true,
+		},
+		{
+			name:     "failure golden-nil",
+			expected: []byte("golden"),
+			actual:   nil,
+			failed:   true,
+		},
+		{
+			name:     "failure nil-golden",
+			expected: nil,
+			actual:   []byte("golden"),
+			failed:   true,
+		},
+		{
+			name:     "failure []-nil",
+			expected: []byte{},
+			actual:   nil,
+			failed:   true,
+		},
+		{
+			name:     "failure nil-[]",
+			expected: nil,
+			actual:   []byte{},
+			failed:   true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tb := &bufferTB{name: t.Name()}
+			tool := tool.SetTest(tb)
+			tool.mkdirAll = func(path string, perm os.FileMode) error { return nil }
+			tool.readFile = helperOSReadFile(t, tt.expected, nil)
+
+			conclusion := tool.Equal(tt.actual)
+			conclusion.Fail()
+			if conclusion.Failed() {
+				assert.Panics(t, func() {
+					conclusion.FailNow()
+				})
+			} else {
+				assert.NotPanics(t, func() {
+					conclusion.FailNow()
+				})
+			}
+			if assert.Equal(t, tt.failed, conclusion.Failed()) {
+				helper.SetTest(t).Equal(tb.Bytes()).FailNow()
+			}
+		})
+	}
+}
+
+func helperOSReadFile(t testing.TB, content []byte, err error) func(string) ([]byte, error) {
+	bs := make([]byte, len(content))
+	if content == nil {
+		bs = nil
+		if err == nil {
+			// The concept of working with golden files: nil == os.ErrNotExist.
+			err = os.ErrNotExist
+		}
+	} else {
+		copy(bs, content)
+	}
+	return func(filename string) ([]byte, error) {
+		t.Logf("os.ReadFile(%q)", filename)
+		t.Logf("os.ReadFile.bytes:\n %[1]T %#[1]v\n %[2]T %#[2]v", bs, string(bs))
+		t.Logf("os.ReadFile.error: %v", err)
+		return bs, err
 	}
 }
