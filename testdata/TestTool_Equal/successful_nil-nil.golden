@@ -1,0 +1,2 @@
+golden_test: method called *golden.bufferTB.Helper()
+golden: read the value of nil since it is not found file: testdata/TestTool_Equal/successful_nil-nil.golden
