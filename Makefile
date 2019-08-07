@@ -94,6 +94,5 @@ vet: ## Check the project with vet
 
 .PHONY: actual
 actual: ## Checking the relevance of dependencies, and tools. And also the absence of arbitrary changes when performing checks.
-	@$(MAKE) toolsup
 	@go mod tidy
 	@if [ -n "$(git diff)" ]; then echo "All relevant"; else git diff --exit-code; fi;
