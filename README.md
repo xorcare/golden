@@ -40,6 +40,12 @@ To install Golden, use go get:
 go get -u github.com/xorcare/golden
 ```
 
+Installation with using Go modules
+
+```bash
+go get github.com/xorcare/golden@latest
+```
+
 ## Examples
 
 **Using** `golden.Assert` - to check and save the data in the golden file.
