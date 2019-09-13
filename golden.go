@@ -217,6 +217,7 @@ func (tool Tool) mkdir(loc string) {
 	fileInfo, err := tool.stat(loc)
 	switch {
 	case err != nil && os.IsNotExist(err):
+		tool.test.Logf("golden: trying to create a directory: %q", loc)
 		err = tool.mkdirAll(loc, tool.modeDir)
 	case err == nil && !fileInfo.IsDir():
 		tool.test.Errorf("golden: test dir is a file: %s", loc)

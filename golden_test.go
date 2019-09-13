@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -839,7 +840,7 @@ func TestTool_mkdir(t *testing.T) {
 		{
 			name: "fatality-error",
 			args: args{
-				loc: tool.SetTest(t).path(),
+				loc: filepath.Dir(tool.SetTest(t).path()),
 			},
 			stat: stat{
 				error: os.ErrPermission,
@@ -849,7 +850,7 @@ func TestTool_mkdir(t *testing.T) {
 		{
 			name: "error-file-does-not-exist",
 			args: args{
-				loc: tool.SetTest(t).path(),
+				loc: filepath.Dir(tool.SetTest(t).path()),
 			},
 			stat: stat{
 				error: os.ErrNotExist,
