@@ -386,6 +386,11 @@ func TestTool_path(t *testing.T) {
 			tool: tool.SetTarget(Golden).SetPrefix("gold"),
 			path: "testdata/TestTool_path/path-target-golden-prefix-gold.gold.golden",
 		},
+		{
+			name: "path-prefix-with-spaces",
+			tool: tool.SetTarget(Golden).SetPrefix("path prefix with spaces"),
+			path: "testdata/TestTool_path/path-prefix-with-spaces.path prefix with spaces.golden",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
