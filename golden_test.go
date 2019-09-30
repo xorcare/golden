@@ -352,39 +352,46 @@ func TestTool_Assert(t *testing.T) {
 
 func TestTool_path(t *testing.T) {
 	tests := []struct {
-		name     string
-		tool     Tool
-		wantPath string
+		name string
+		path string
+		tool Tool
 	}{
 		{
 			name: "empty",
 			tool: Tool{},
+			path: "TestTool_path/empty.golden",
 		},
 		{
 			name: "default",
 			tool: tool,
+			path: "testdata/TestTool_path/default.golden",
 		},
 		{
 			name: "path-target-input",
 			tool: tool.SetTarget(Input),
+			path: "testdata/TestTool_path/path-target-input.input",
 		},
 		{
 			name: "path-target-golden",
 			tool: tool.SetTarget(Golden),
+			path: "testdata/TestTool_path/path-target-golden.golden",
 		},
 		{
 			name: "path-target-input-prefix-gold",
 			tool: tool.SetTarget(Input).SetPrefix("gold"),
+			path: "testdata/TestTool_path/path-target-input-prefix-gold.gold.input",
 		},
 		{
 			name: "path-target-golden-prefix-gold",
 			tool: tool.SetTarget(Golden).SetPrefix("gold"),
+			path: "testdata/TestTool_path/path-target-golden-prefix-gold.gold.golden",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			test := &FakeTest{name: t.Name()}
-			helper.SetTest(t).Assert([]byte(tt.tool.SetTest(test).path()))
+			if got := tt.tool.SetTest(t).path(); got != tt.path {
+				t.Fatalf("error want path %q, actual %q", tt.path, got)
+			}
 		})
 	}
 }
