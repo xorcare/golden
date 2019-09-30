@@ -389,7 +389,7 @@ func TestTool_path(t *testing.T) {
 		{
 			name: "path-prefix-with-spaces",
 			tool: tool.SetTarget(Golden).SetPrefix("path prefix with spaces"),
-			path: "testdata/TestTool_path/path-prefix-with-spaces.path prefix with spaces.golden",
+			path: "testdata/TestTool_path/path-prefix-with-spaces.path_prefix_with_spaces.golden",
 		},
 	}
 	for _, tt := range tests {
@@ -1075,6 +1075,42 @@ func Test_target_String(t *testing.T) {
 					t.Errorf("target.String() = %v, want %v", got, tt.want)
 				}
 			}()
+		})
+	}
+}
+
+func Test_rewrite(t *testing.T) {
+	tests := []struct {
+		name string
+		arg  string
+		want string
+	}{
+		{
+			name: "simple case with spaces",
+			arg:  "simple case with spaces",
+			want: "simple_case_with_spaces",
+		},
+		{
+			name: "simple case with tab",
+			arg:  "simple case with\ttab",
+			want: "simple_case_with_tab",
+		},
+		{
+			name: "simple case with new line",
+			arg:  "simple case with" + "\n" + "new line",
+			want: "simple_case_with_new_line",
+		},
+		{
+			name: "incorrect rune(0)",
+			arg:  "simple case with" + string(rune(0)),
+			want: `simple_case_with\x00`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := rewrite(tt.arg); got != tt.want {
+				t.Errorf("rewrite() = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }

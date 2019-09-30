@@ -11,6 +11,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -151,7 +153,7 @@ func (tool Tool) Run(do func(input []byte) (got []byte, err error)) {
 
 // SetPrefix a prefix value setter.
 func (tool Tool) SetPrefix(prefix string) Tool {
-	tool.prefix = prefix
+	tool.prefix = rewrite(prefix)
 	return tool
 }
 
@@ -241,4 +243,22 @@ func (tool Tool) path() (path string) {
 	}
 
 	return filepath.Join(tool.dir, s)
+}
+
+// rewrite rewrites a subname to having only printable characters and no white
+// space.
+func rewrite(str string) string {
+	bs := make([]byte, 0, len(str))
+	for _, b := range str {
+		switch {
+		case unicode.IsSpace(b):
+			bs = append(bs, '_')
+		case !strconv.IsPrint(b):
+			s := strconv.QuoteRune(b)
+			bs = append(bs, s[1:len(s)-1]...)
+		default:
+			bs = append(bs, string(b)...)
+		}
+	}
+	return string(bs)
 }
