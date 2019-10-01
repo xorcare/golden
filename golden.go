@@ -47,6 +47,10 @@ type TestingTB interface {
 	Fatalf(format string, args ...interface{})
 }
 
+type testingHelper interface {
+	Helper()
+}
+
 // Tool implements the basic logic of working with golden files.
 // All functionality is implemented through a non-mutating state
 // machine, which at a certain point in time can perform an action
@@ -97,6 +101,9 @@ func init() {
 // the value from the golden file. Also, built-in functionality for
 // updating golden files using the command line flag.
 func Assert(t TestingTB, got []byte) {
+	if h, ok := t.(testingHelper); ok {
+		h.Helper()
+	}
 	tool.SetTest(t).Assert(got)
 }
 
@@ -124,6 +131,9 @@ func SetTest(t TestingTB) Tool {
 // updating golden files using the command line flag.
 func (tool Tool) Assert(got []byte) {
 	tool.Update(got)
+	if h, ok := tool.test.(testingHelper); ok {
+		h.Helper()
+	}
 	tool.compare(got, tool.SetTarget(Golden).Read())
 }
 
