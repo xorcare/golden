@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"unicode"
 	"unicode/utf8"
 )
@@ -237,12 +238,19 @@ func (tool Tool) ok(err error) {
 
 // path is getter to get the path to the file containing the test data.
 func (tool Tool) path() (path string) {
-	s := fmt.Sprintf("%s.%s", tool.test.Name(), tool.target.String())
+	format := "%s"
+	args := []interface{}{tool.test.Name()}
+
 	if tool.prefix != "" {
-		s = fmt.Sprintf("%s.%s.%s", tool.test.Name(), tool.prefix, tool.target.String())
+		args = append(args, tool.prefix)
 	}
 
-	return filepath.Join(tool.dir, s)
+	// Add a target extansion. Always added last.
+	args = append(args, tool.target.String())
+	// We add placeholders for the number of parameters excluding the name
+	// of the test to print all the parameters.
+	format += strings.Repeat(".%s", len(args)-1)
+	return filepath.Join(tool.dir, fmt.Sprintf(format, args...))
 }
 
 // rewrite rewrites a subname to having only printable characters and no white
