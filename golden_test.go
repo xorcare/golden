@@ -973,6 +973,10 @@ func (m *FakeTest) Fatalf(format string, args ...interface{}) {
 	panic(fmt.Sprintf(format, args...))
 }
 
+func (m *FakeTest) Helper() {
+	m.Logf("golden_test: method called %T.Helper()", m)
+}
+
 // test control methods.
 
 func (m *FakeTest) Bytes() (bs []byte) {

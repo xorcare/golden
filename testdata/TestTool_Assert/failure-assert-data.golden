@@ -1,2 +1,4 @@
+=== LOGS
+golden_test: method called *golden.FakeTest.Helper()
 === FATS
 golden: compare error got = "golden", want "Z29sZGVu"
