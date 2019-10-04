@@ -63,18 +63,18 @@ static: fmt imports vet lint ## Run static checks (fmt, lint, imports, vet, ...)
 
 .PHONY: test
 test: ## Run unit tests
-	@go test ./... $(ARGS) -coverprofile=$(COVER_FILE) -covermode=atomic $d
+	@go test `go list ./... | grep -v /vendor/` -coverprofile=$(COVER_FILE) -covermode=atomic $d
 	@go tool cover -func=$(COVER_FILE) | grep ^total
 
 .PHONY: testin
 testin: ## Run integration tests
-	@go test ./... -tags=integration -coverprofile=$(COVER_FILE) -covermode=atomic $d
+	@go test `go list ./... | grep -v /vendor/` -tags=integration -coverprofile=$(COVER_FILE) -covermode=atomic $d
 	@go tool cover -func=$(COVER_FILE) | grep ^total
 
 .PHONY: testup
 testup: ## Run unit tests with golden files update
 	@find . -type f -name '*.golden' -exec rm -f {} \;
-	@go test ./... -update
+	@go test `go list ./... | grep -v /vendor/` -update
 
 CDTOOLS ?= cd internal/tools &&
 .PHONY: tools
