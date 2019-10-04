@@ -81,12 +81,14 @@ CDTOOLS ?= cd internal/tools &&
 tools: ## Install all needed tools, e.g. for static checks
 	@$(CDTOOLS) go install golang.org/x/lint/golint
 	@$(CDTOOLS) go install golang.org/x/tools/cmd/goimports
+	@$(CDTOOLS) go install github.com/vburenin/ifacemaker
 
 .PHONY: toolsup
 toolsup: ## Update all needed tools, e.g. for static checks
 	@$(CDTOOLS) go mod tidy
 	@$(CDTOOLS) go get golang.org/x/lint/golint@latest
 	@$(CDTOOLS) go get golang.org/x/tools/cmd/goimports@latest
+	@$(CDTOOLS) go get github.com/vburenin/ifacemaker@v1.0.0
 	@$(CDTOOLS) go mod download
 	@$(CDTOOLS) go mod verify
 	@$(MAKE) tools
@@ -96,7 +98,7 @@ vet: ## Check the project with vet
 	@go vet ./...
 
 .PHONY: checkstate
-checkstate: ## Checking the relevance of dependencies, and tools. Also, the absence of arbitrary changes when performing checks.
+checkstate: tools ## Checking the relevance of dependencies, and tools. Also, the absence of arbitrary changes when performing checks.
 	@echo 'checking the relevance of the dependency list'
 	@go mod tidy
 	@git diff --exit-code go.mod go.sum
