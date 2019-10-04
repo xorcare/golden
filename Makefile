@@ -20,8 +20,11 @@ bench: ## Run benchmarks
 build: ## Build the project binary
 	@go build ./...
 
+.PHONY: ci
+ci: check actual ## Target for integration with ci pipeline
+
 .PHONY: check
-check: static test actual ## Check project with static checks and unit tests
+check: static test build ## Check project with static checks and unit tests
 
 $(COVER_FILE):
 	@$(MAKE) test
