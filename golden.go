@@ -148,7 +148,7 @@ func (tool Tool) Assert(got []byte) {
 	if h, ok := tool.test.(testingHelper); ok {
 		h.Helper()
 	}
-	tool.compare(got, tool.SetTarget(Golden).Read())
+	tool.Equal(got).FailNow()
 }
 
 // Equal is a tool to compare the actual value obtained in the test and
