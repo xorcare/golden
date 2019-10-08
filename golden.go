@@ -111,6 +111,16 @@ func Assert(t TestingTB, got []byte) {
 	tool.SetTest(t).Assert(got)
 }
 
+// Equal is a tool to compare the actual value obtained in the test and
+// the value from the golden file. Also, built-in functionality for
+// updating golden files using the command line flag.
+func Equal(t TestingTB, got []byte) Conclusion {
+	if h, ok := t.(testingHelper); ok {
+		h.Helper()
+	}
+	return tool.SetTest(t).Equal(got)
+}
+
 // Read is a functional for reading both input and golden files using
 // the appropriate target.
 func Read(t TestingTB) []byte {
