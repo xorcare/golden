@@ -1,4 +1,5 @@
 golden_test: method called *golden.bufferTB.Helper()
 golden_test: method called *golden.bufferTB.Helper()
+golden_test: method called *golden.bufferTB.Helper()
 golden: permission denied
 golden_test: method called *golden.bufferTB.FailNow()
