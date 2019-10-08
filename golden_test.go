@@ -1148,6 +1148,92 @@ func TestTool_Equal(t *testing.T) {
 	}
 }
 
+func TestEqual(t *testing.T) {
+	type args struct {
+	}
+	tests := []struct {
+		name     string
+		args     args
+		actual   []byte
+		expected []byte
+		failed   bool
+	}{
+		{
+			name:     "successful nil-nil",
+			expected: nil,
+			actual:   nil,
+			failed:   false,
+		},
+		{
+			name:     "successful []-[]",
+			expected: []byte{},
+			actual:   []byte{},
+			failed:   false,
+		},
+		{
+			name:     "successful golden-golden",
+			expected: []byte("golden"),
+			actual:   []byte("golden"),
+			failed:   false,
+		},
+		{
+			name:     "failure golden-Z29sZGVu",
+			expected: []byte("golden"),
+			actual:   []byte("Z29sZGVu"),
+			failed:   true,
+		},
+		{
+			name:     "failure golden-nil",
+			expected: []byte("golden"),
+			actual:   nil,
+			failed:   true,
+		},
+		{
+			name:     "failure nil-golden",
+			expected: nil,
+			actual:   []byte("golden"),
+			failed:   true,
+		},
+		{
+			name:     "failure []-nil",
+			expected: []byte{},
+			actual:   nil,
+			failed:   true,
+		},
+		{
+			name:     "failure nil-[]",
+			expected: nil,
+			actual:   []byte{},
+			failed:   true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			origin := tool
+			defer func() { tool = origin }()
+
+			tb := &bufferTB{name: t.Name()}
+			tool.mkdirAll = func(path string, perm os.FileMode) error { return nil }
+			tool.readFile = helperOSReadFile(t, tt.expected, nil)
+
+			conclusion := Equal(tb, tt.actual)
+			conclusion.Fail()
+			if conclusion.Failed() {
+				assert.Panics(t, func() {
+					conclusion.FailNow()
+				})
+			} else {
+				assert.NotPanics(t, func() {
+					conclusion.FailNow()
+				})
+			}
+			if assert.Equal(t, tt.failed, conclusion.Failed()) {
+				helper.SetTest(t).Equal(tb.Bytes()).FailNow()
+			}
+		})
+	}
+}
+
 func helperOSReadFile(t testing.TB, content []byte, err error) func(string) ([]byte, error) {
 	bs := make([]byte, len(content))
 	if content == nil {

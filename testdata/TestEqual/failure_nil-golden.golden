@@ -1,0 +1,31 @@
+golden_test: method called *golden.bufferTB.Helper()
+golden_test: method called *golden.bufferTB.Helper()
+golden: read the value of nil since it is not found file: testdata/TestEqual/failure_nil-golden.golden
+
+	Error Trace:
+	Error:      	Not equal: 
+	            	expected: "[]byte(nil)"
+	            	actual  : "golden"
+	            	
+	            	Diff:
+	            	--- Expected
+	            	+++ Actual
+	            	@@ -1 +1 @@
+	            	-[]byte(nil)
+	            	+golden
+
+golden_test: method called *golden.bufferTB.Fail()
+
+	Error Trace:
+	Error:      	Not equal: 
+	            	expected: "[]byte(nil)"
+	            	actual  : "golden"
+	            	
+	            	Diff:
+	            	--- Expected
+	            	+++ Actual
+	            	@@ -1 +1 @@
+	            	-[]byte(nil)
+	            	+golden
+
+golden_test: method called *golden.bufferTB.FailNow()
