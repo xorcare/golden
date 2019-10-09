@@ -1,4 +1,3 @@
-=== LOGS
-golden: start write to file: TestTool_write/write-empty.golden
-=== ERRS
 golden: test dir is a file: TestTool_write
+golden_test: method called *golden.bufferTB.Fail()
+golden: start write to file: TestTool_write/write-empty.golden

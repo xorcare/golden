@@ -6,11 +6,9 @@ package golden
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 )
@@ -25,7 +23,7 @@ func TestMain(m *testing.M) {
 
 func TestAssert(t *testing.T) {
 	type args struct {
-		test *FakeTest
+		test *bufferTB
 		got  []byte
 	}
 	type readFile struct {
@@ -41,7 +39,7 @@ func TestAssert(t *testing.T) {
 		{
 			name: "success-assert-nil-with-error-not-exist",
 			args: args{
-				test: new(FakeTest),
+				test: new(bufferTB),
 				got:  nil,
 			},
 			readFile: readFile{
@@ -53,7 +51,7 @@ func TestAssert(t *testing.T) {
 		{
 			name: "success-assert-data",
 			args: args{
-				test: new(FakeTest),
+				test: new(bufferTB),
 				got:  []byte("golden"),
 			},
 			readFile: readFile{
@@ -65,7 +63,7 @@ func TestAssert(t *testing.T) {
 		{
 			name: "error-reading-file-permission-denied",
 			args: args{
-				test: new(FakeTest),
+				test: new(bufferTB),
 				got:  nil,
 			},
 			readFile: readFile{
@@ -77,7 +75,7 @@ func TestAssert(t *testing.T) {
 		{
 			name: "failure-assert-data",
 			args: args{
-				test: new(FakeTest),
+				test: new(bufferTB),
 				got:  []byte("golden"),
 			},
 			readFile: readFile{
@@ -110,7 +108,7 @@ func TestAssert(t *testing.T) {
 
 func TestRead(t *testing.T) {
 	type args struct {
-		test *FakeTest
+		test *bufferTB
 	}
 	type readFile struct {
 		error error
@@ -127,7 +125,7 @@ func TestRead(t *testing.T) {
 			name: "success-read-data",
 			want: []byte("golden"),
 			args: args{
-				test: new(FakeTest),
+				test: new(bufferTB),
 			},
 			readFile: readFile{
 				bytes: []byte("golden"),
@@ -139,7 +137,7 @@ func TestRead(t *testing.T) {
 			name: "success-read-nil",
 			want: nil,
 			args: args{
-				test: new(FakeTest),
+				test: new(bufferTB),
 			},
 			readFile: readFile{
 				bytes: nil,
@@ -151,7 +149,7 @@ func TestRead(t *testing.T) {
 			name: "error-reading-file-permission-denied",
 			want: nil,
 			args: args{
-				test: new(FakeTest),
+				test: new(bufferTB),
 			},
 			readFile: readFile{
 				bytes: nil,
@@ -187,7 +185,7 @@ func TestRead(t *testing.T) {
 
 func TestRun(t *testing.T) {
 	type args struct {
-		test *FakeTest
+		test *bufferTB
 		do   func(input []byte) (outcome []byte, err error)
 	}
 	tests := []struct {
@@ -198,7 +196,7 @@ func TestRun(t *testing.T) {
 		{
 			name: "run-without-error",
 			args: args{
-				test: new(FakeTest),
+				test: new(bufferTB),
 				do: func(input []byte) (outcome []byte, err error) {
 					return nil, nil
 				},
@@ -208,7 +206,7 @@ func TestRun(t *testing.T) {
 		{
 			name: "run-with-error",
 			args: args{
-				test: new(FakeTest),
+				test: new(bufferTB),
 				do: func(input []byte) (outcome []byte, err error) {
 					return nil, os.ErrClosed
 				},
@@ -241,7 +239,7 @@ func TestSetTest(t *testing.T) {
 	type args struct {
 		test TestingTB
 	}
-	m := new(FakeTest)
+	m := new(bufferTB)
 	tests := []struct {
 		name string
 		args args
@@ -282,7 +280,7 @@ func TestTool_Assert(t *testing.T) {
 		name     string
 		args     args
 		tool     Tool
-		test     FakeTest
+		test     bufferTB
 		readFile readFile
 		recover  bool
 	}{
@@ -403,7 +401,7 @@ func TestTool_path(t *testing.T) {
 
 func TestTool_Read(t *testing.T) {
 	type args struct {
-		test *FakeTest
+		test *bufferTB
 		tar  target
 	}
 	type readFile struct {
@@ -422,7 +420,7 @@ func TestTool_Read(t *testing.T) {
 			name: "success-read-data",
 			want: []byte("golden"),
 			args: args{
-				test: new(FakeTest),
+				test: new(bufferTB),
 				tar:  Golden,
 			},
 			readFile: readFile{
@@ -435,7 +433,7 @@ func TestTool_Read(t *testing.T) {
 			name: "success-read-nil",
 			want: nil,
 			args: args{
-				test: new(FakeTest),
+				test: new(bufferTB),
 				tar:  Golden,
 			},
 			readFile: readFile{
@@ -448,7 +446,7 @@ func TestTool_Read(t *testing.T) {
 			name: "error-reading-file-permission-denied",
 			want: nil,
 			args: args{
-				test: new(FakeTest),
+				test: new(bufferTB),
 				tar:  Golden,
 			},
 			readFile: readFile{
@@ -486,7 +484,7 @@ func TestTool_Run(t *testing.T) {
 	tests := []struct {
 		name    string
 		tool    Tool
-		test    FakeTest
+		test    bufferTB
 		args    args
 		recover bool
 	}{
@@ -602,7 +600,7 @@ func TestTool_Update(t *testing.T) {
 	tests := []struct {
 		name string
 		tool Tool
-		test FakeTest
+		test bufferTB
 		args args
 		stat stat
 	}{
@@ -656,7 +654,7 @@ func TestTool_Update(t *testing.T) {
 
 func TestTool_write(t *testing.T) {
 	type args struct {
-		test  *FakeTest
+		test  *bufferTB
 		tar   target
 		bytes []byte
 	}
@@ -675,7 +673,7 @@ func TestTool_write(t *testing.T) {
 		{
 			name: "write-nil",
 			args: args{
-				test:  new(FakeTest),
+				test:  new(bufferTB),
 				tar:   Golden,
 				bytes: nil,
 			},
@@ -687,7 +685,7 @@ func TestTool_write(t *testing.T) {
 		{
 			name: "write-nil-with-file-exist",
 			args: args{
-				test:  new(FakeTest),
+				test:  new(bufferTB),
 				tar:   Golden,
 				bytes: nil,
 			},
@@ -700,7 +698,7 @@ func TestTool_write(t *testing.T) {
 		{
 			name: "write-empty",
 			args: args{
-				test:  new(FakeTest),
+				test:  new(bufferTB),
 				tar:   Golden,
 				bytes: []byte{},
 			},
@@ -712,7 +710,7 @@ func TestTool_write(t *testing.T) {
 		{
 			name: "write-bytes",
 			args: args{
-				test:  new(FakeTest),
+				test:  new(bufferTB),
 				tar:   Golden,
 				bytes: []byte("golden"),
 			},
@@ -724,7 +722,7 @@ func TestTool_write(t *testing.T) {
 		{
 			name: "fatality-error",
 			args: args{
-				test:  new(FakeTest),
+				test:  new(bufferTB),
 				tar:   Golden,
 				bytes: []byte("golden"),
 			},
@@ -781,7 +779,7 @@ func TestTool_compare(t *testing.T) {
 	tests := []struct {
 		name    string
 		tool    Tool
-		test    FakeTest
+		test    bufferTB
 		args    args
 		recover bool
 	}{
@@ -843,7 +841,7 @@ func TestTool_mkdir(t *testing.T) {
 	tests := []struct {
 		name     string
 		tool     Tool
-		test     FakeTest
+		test     bufferTB
 		args     args
 		stat     stat
 		mkdirAll error
@@ -913,7 +911,7 @@ func TestTool_ok(t *testing.T) {
 	tests := []struct {
 		name    string
 		tool    Tool
-		test    FakeTest
+		test    bufferTB
 		args    args
 		recover bool
 	}{
@@ -944,61 +942,6 @@ func TestTool_ok(t *testing.T) {
 			tt.tool.SetTest(&tt.test).ok(tt.args.err)
 		})
 	}
-}
-
-// FakeTest implements TestingTB methods.
-type FakeTest struct {
-	name string
-	errs []string
-	logs []string
-	fats []string
-}
-
-// TestingTB interface methods.
-
-func (m FakeTest) Name() string {
-	return m.name
-}
-
-func (m *FakeTest) Logf(format string, args ...interface{}) {
-	m.logs = append(m.logs, fmt.Sprintf(format, args...))
-}
-
-func (m *FakeTest) Errorf(format string, args ...interface{}) {
-	m.errs = append(m.errs, fmt.Sprintf(format, args...))
-}
-
-func (m *FakeTest) Fatalf(format string, args ...interface{}) {
-	m.fats = append(m.fats, fmt.Sprintf(format, args...))
-	panic(fmt.Sprintf(format, args...))
-}
-
-func (m *FakeTest) Helper() {
-	m.Logf("golden_test: method called %T.Helper()", m)
-}
-
-// test control methods.
-
-func (m *FakeTest) Bytes() (bs []byte) {
-	f := func(h string, lns []string) (bs []byte) {
-		if len(lns) == 0 {
-			return nil
-		}
-
-		bs = append(bs, []byte(fmt.Sprintf("=== %s\n", strings.ToUpper(h)))...)
-
-		for _, v := range lns {
-			bs = append(bs, []byte(fmt.Sprintf("%s\n", v))...)
-		}
-
-		return bs
-	}
-
-	bs = append(bs, f("Logs", m.logs)...)
-	bs = append(bs, f("Errs", m.errs)...)
-	bs = append(bs, f("Fats", m.fats)...)
-
-	return bs
 }
 
 // FakeStat implements os.FileInfo.

@@ -1,4 +1,3 @@
-=== LOGS
-golden_test: method called *golden.FakeTest.Helper()
-=== FATS
+golden_test: method called *golden.bufferTB.Helper()
 golden: permission denied
+golden_test: method called *golden.bufferTB.FailNow()

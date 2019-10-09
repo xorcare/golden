@@ -1,2 +1,2 @@
-=== FATS
 golden: permission denied
+golden_test: method called *golden.bufferTB.FailNow()

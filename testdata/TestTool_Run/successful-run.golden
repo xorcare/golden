@@ -1,2 +1,1 @@
-=== LOGS
-golden_test: method called *golden.FakeTest.Helper()
+golden_test: method called *golden.bufferTB.Helper()

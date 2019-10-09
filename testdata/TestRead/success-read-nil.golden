@@ -1,2 +1,1 @@
-=== LOGS
 golden: read the value of nil since it is not found file: testdata/TestRead/success-read-nil.input

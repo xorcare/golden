@@ -1,3 +1,2 @@
-=== LOGS
-golden_test: method called *golden.FakeTest.Helper()
+golden_test: method called *golden.bufferTB.Helper()
 golden: read the value of nil since it is not found file: TestTool_Assert/success-assert-nil-with-error-not-exist.golden

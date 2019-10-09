@@ -1,2 +1,2 @@
-=== FATS
 golden: file already closed
+golden_test: method called *golden.bufferTB.FailNow()
