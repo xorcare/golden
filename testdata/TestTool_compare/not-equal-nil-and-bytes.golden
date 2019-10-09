@@ -1,2 +1,2 @@
-=== FATS
 golden: compare error got = "golden", want ""
+golden_test: method called *golden.bufferTB.FailNow()

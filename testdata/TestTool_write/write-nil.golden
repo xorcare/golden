@@ -1,4 +1,3 @@
-=== LOGS
 golden: trying to create a directory: "TestTool_write"
 golden: start write to file: TestTool_write/write-nil.golden
 golden: nil value will not be written

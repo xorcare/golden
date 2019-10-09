@@ -1,2 +1,2 @@
-=== ERRS
 golden: test dir is a file: testdata/TestTool_mkdir.golden
+golden_test: method called *golden.bufferTB.Fail()
