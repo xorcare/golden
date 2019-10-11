@@ -739,7 +739,7 @@ func TestTool_write(t *testing.T) {
 			tt.args.test.name = t.Name()
 			tt.tool.writeFile = func(filename string, data []byte, perm os.FileMode) error {
 				t.Logf(`os.WriteFile(%q, %q, %d) `, filename, data, perm)
-				helper.SetTest(t).compare(data, tt.args.bytes)
+				assert.Equal(t, data, tt.args.bytes)
 				if data == nil {
 					t.Errorf("you cannot write nil values to a file")
 				}
@@ -769,65 +769,6 @@ func TestTool_write(t *testing.T) {
 			tt.tool.SetTest(tt.args.test).
 				SetTarget(tt.args.tar).
 				write(tt.args.bytes)
-		})
-	}
-}
-
-func TestTool_compare(t *testing.T) {
-	type args struct {
-		got  []byte
-		want []byte
-	}
-	tests := []struct {
-		name    string
-		tool    Tool
-		test    bufferTB
-		args    args
-		recover bool
-	}{
-		{
-			name: "equal-nil",
-			args: args{
-				got:  nil,
-				want: nil,
-			},
-			recover: false,
-		},
-		{
-			name: "equal-bytes",
-			args: args{
-				got:  []byte("golden"),
-				want: []byte("golden"),
-			},
-			recover: false,
-		},
-		{
-			name: "not-equal-nil-and-bytes",
-			args: args{
-				got:  []byte("golden"),
-				want: nil,
-			},
-			recover: true,
-		},
-		{
-			name: "not-equal-bytes",
-			args: args{
-				got:  []byte("golden"),
-				want: []byte("Z29sZGVu"),
-			},
-			recover: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			defer func() {
-				if r := recover(); (r == nil) == tt.recover {
-					t.Error(r)
-				}
-				helper.SetTest(t).Assert(tt.test.Bytes())
-			}()
-			tt.test.name = t.Name()
-			tt.tool.SetTest(&tt.test).compare(tt.args.got, tt.args.want)
 		})
 	}
 }
