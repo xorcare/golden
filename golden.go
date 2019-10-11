@@ -64,9 +64,7 @@ type Tool struct {
 	test     TestingTB
 	dir      string
 	fileMode os.FileMode
-	inpExt   string
 	modeDir  os.FileMode
-	outExt   string
 	target   target
 	flag     *bool
 	prefix   string
