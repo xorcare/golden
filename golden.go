@@ -5,7 +5,6 @@
 package golden
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -14,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
-	"unicode/utf8"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -248,18 +246,6 @@ func (tool Tool) write(bs []byte) {
 		}
 	} else {
 		tool.ok(tool.writeFile(path, bs, tool.fileMode))
-	}
-}
-
-// compare mechanism to compare the bytes.
-func (tool Tool) compare(got, want []byte) {
-	if !bytes.Equal(got, want) {
-		format := "golden: compare error got = %#v, want %#v"
-		if utf8.ValidString(string(want)) || utf8.ValidString(string(got)) {
-			format = "golden: compare error got = %q, want %q"
-		}
-
-		tool.test.Fatalf(format, got, want)
 	}
 }
 
