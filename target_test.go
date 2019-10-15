@@ -1,50 +1,38 @@
 package golden
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_target_String(t *testing.T) {
 	tests := []struct {
-		name    string
-		t       target
-		want    string
-		recover bool
+		target target
+		want   string
+		runner func(assert.TestingT, assert.PanicTestFunc, ...interface{}) bool
 	}{
 		{
-			name:    "Golden",
-			t:       Golden,
-			want:    "golden",
-			recover: false,
+			target: Golden,
+			want:   "golden",
+			runner: assert.NotPanics,
 		},
 		{
-			name:    "Input",
-			t:       Input,
-			want:    "input",
-			recover: false,
+			target: Input,
+			want:   "input",
+			runner: assert.NotPanics,
 		},
 		{
-			name:    "Panic",
-			t:       latest,
-			want:    "unsupported target: 2",
-			recover: true,
+			target: latest,
+			want:   "unsupported target: 2",
+			runner: assert.Panics,
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			func() {
-				defer func() {
-					if r := recover(); (r == nil) == tt.recover {
-						t.Error(r)
-					} else if r != nil && !reflect.DeepEqual(r, tt.want) {
-						t.Errorf("the expected result of execution = %v, want %v", r, tt.want)
-					}
-				}()
-				if got := tt.t.String(); got != tt.want {
-					t.Errorf("target.String() = %v, want %v", got, tt.want)
-				}
-			}()
+		t.Run(tt.want, func(t *testing.T) {
+			tt.runner(t, func() {
+				assert.Equal(t, tt.want, tt.target.String())
+			})
 		})
 	}
 }
