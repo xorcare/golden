@@ -41,10 +41,6 @@ dep: ## Install and sync go modules dependencies, beautify go.mod and go.sum fil
 	@go mod download
 	@go mod verify
 
-.PHONY: fmt
-fmt: ## Run go fmt for the whole project
-	@test -z $$(for d in $$(go list -f {{.Dir}} ./...); do go fmt $$d/*.go; done)
-
 .PHONY: help
 help: ## Print this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -59,7 +55,7 @@ lint: tools ## Check the project with lint
 	@go list ./... | grep -v /vendor/ | xargs -L1 golint -set_exit_status
 
 .PHONY: static
-static: fmt imports vet lint ## Run static checks (fmt, lint, imports, vet, ...) all over the project
+static: imports vet lint ## Run static checks (lint, imports, vet, ...) all over the project
 
 .PHONY: test
 test: ## Run unit tests
