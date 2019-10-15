@@ -844,42 +844,30 @@ func TestTool_mkdir(t *testing.T) {
 	}
 }
 
-func TestTool_ok(t *testing.T) {
-	type args struct {
-		err error
-	}
+func TestTool_noError(t *testing.T) {
 	tests := []struct {
-		name    string
-		tool    Tool
-		test    bufferTB
-		args    args
-		recover bool
+		name   string
+		err    error
+		runner func(assert.TestingT, assert.PanicTestFunc, ...interface{}) bool
 	}{
 		{
-			name: "without-error",
-			args: args{
-				err: nil,
-			},
-			recover: false,
+			name:   "without-error",
+			err:    nil,
+			runner: assert.NotPanics,
 		},
 		{
-			name: "with-error",
-			args: args{
-				err: os.ErrPermission,
-			},
-			recover: true,
+			name:   "with-error",
+			err:    os.ErrPermission,
+			runner: assert.Panics,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			defer func() {
-				if r := recover(); (r == nil) == tt.recover {
-					t.Error(r)
-				}
-				_goldie.SetTest(t).Assert(tt.test.Bytes())
-			}()
-			tt.test.name = t.Name()
-			tt.tool.SetTest(&tt.test).ok(tt.args.err)
+			tb := &bufferTB{name: t.Name()}
+			tt.runner(t, func() {
+				SetTest(tb).noError(tt.err)
+			})
+			_goldie.SetTest(t).Equal(tb.Bytes()).FailNow()
 		})
 	}
 }
@@ -898,7 +886,7 @@ type FakeStat struct {
 func (f *FakeStat) Name() string {
 	// A bit of a cheat: we only
 	// have a basename, so that's
-	// also ok for FileInfo.
+	// also noError for FileInfo.
 	return f.name
 }
 
