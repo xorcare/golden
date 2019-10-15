@@ -2,7 +2,12 @@ package golden
 
 import (
 	"fmt"
+
+	"github.com/stretchr/testify/assert"
 )
+
+var _ assert.TestingT = new(interceptor)
+var _ fmt.Stringer = interceptor("")
 
 // interceptor need to intercept the output of logs from testify.assert.
 type interceptor string
