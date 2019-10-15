@@ -172,7 +172,7 @@ func (t Tool) Read() (bs []byte) {
 // checking the results.
 func (t Tool) Run(do func(input []byte) (got []byte, err error)) {
 	bs, err := do(t.SetTarget(Input).Read())
-	t.ok(err)
+	t.noError(err)
 	t.Assert(bs)
 }
 
@@ -217,13 +217,13 @@ func (t Tool) write(bs []byte) {
 		fileInfo, err := t.stat(path)
 		if err == nil && !fileInfo.IsDir() {
 			t.test.Logf("golden: current test bytes file will be deleted")
-			t.ok(t.remove(path))
+			t.noError(t.remove(path))
 		}
 		if !os.IsNotExist(err) {
-			t.ok(err)
+			t.noError(err)
 		}
 	} else {
-		t.ok(t.writeFile(path, bs, t.fileMode))
+		t.noError(t.writeFile(path, bs, t.fileMode))
 	}
 }
 
@@ -238,11 +238,11 @@ func (t Tool) mkdir(loc string) {
 		t.test.Errorf("golden: test dir is a file: %s", loc)
 	}
 
-	t.ok(err)
+	t.noError(err)
 }
 
-// ok fails the test if an err is not nil.
-func (t Tool) ok(err error) {
+// noError fails the test if an err is not nil.
+func (t Tool) noError(err error) {
 	if err != nil {
 		t.test.Fatalf("golden: %s", err)
 	}
