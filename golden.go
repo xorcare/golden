@@ -104,7 +104,7 @@ func Assert(t TestingTB, got []byte) {
 	if h, ok := t.(testingHelper); ok {
 		h.Helper()
 	}
-	_golden.SetTest(t).Assert(got)
+	SetTest(t).Assert(got)
 }
 
 // Equal is a tool to compare the actual value obtained in the test and
@@ -114,20 +114,20 @@ func Equal(t TestingTB, got []byte) Conclusion {
 	if h, ok := t.(testingHelper); ok {
 		h.Helper()
 	}
-	return _golden.SetTest(t).Equal(got)
+	return SetTest(t).Equal(got)
 }
 
 // Read is a functional for reading both input and golden files using
 // the appropriate target.
 func Read(t TestingTB) []byte {
-	return _golden.SetTest(t).SetTarget(Input).Read()
+	return SetTest(t).SetTarget(Input).Read()
 }
 
 // Run is a functional that automates the process of reading the input file
 // of the test bytes and the execution of the input function of testing and
 // checking the results.
 func Run(t TestingTB, do func(input []byte) (outcome []byte, err error)) {
-	_golden.SetTest(t).Run(do)
+	SetTest(t).Run(do)
 }
 
 // SetTest is a mechanism to create a new copy of the base Tool object for
