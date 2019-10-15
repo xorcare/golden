@@ -139,24 +139,24 @@ func SetTest(t TestingTB) Tool {
 // Assert is a tool to compare the actual value obtained in the test and
 // the value from the golden file. Also, built-in functionality for
 // updating golden files using the command line flag.
-func (tool Tool) Assert(got []byte) {
-	tool.Update(got)
-	if h, ok := tool.test.(testingHelper); ok {
+func (t Tool) Assert(got []byte) {
+	t.Update(got)
+	if h, ok := t.test.(testingHelper); ok {
 		h.Helper()
 	}
-	tool.Equal(got).FailNow()
+	t.Equal(got).FailNow()
 }
 
 // Equal is a tool to compare the actual value obtained in the test and
 // the value from the golden file. Also, built-in functionality for
 // updating golden files using the command line flag.
-func (tool Tool) Equal(actual []byte) Conclusion {
-	tool.Update(actual)
-	if h, ok := tool.test.(testingHelper); ok {
+func (t Tool) Equal(actual []byte) Conclusion {
+	t.Update(actual)
+	if h, ok := t.test.(testingHelper); ok {
 		h.Helper()
 	}
 
-	expected := tool.SetTarget(Golden).Read()
+	expected := t.SetTarget(Golden).Read()
 
 	if expected == nil {
 		expected = []byte(fmt.Sprintf("%#v", expected))
@@ -166,7 +166,7 @@ func (tool Tool) Equal(actual []byte) Conclusion {
 	}
 
 	i := new(interceptor)
-	c := newConclusion(tool.test)
+	c := newConclusion(t.test)
 	c.successful = assert.Equal(i, string(expected), string(actual))
 	c.diff = i
 
@@ -175,15 +175,15 @@ func (tool Tool) Equal(actual []byte) Conclusion {
 
 // Read is a functional for reading both input and golden files using
 // the appropriate target.
-func (tool Tool) Read() (bs []byte) {
+func (t Tool) Read() (bs []byte) {
 	const f = "golden: read the value of nil since it is not found file: %s"
 
-	bs, err := tool.readFile(tool.path())
+	bs, err := t.readFile(t.path())
 	if os.IsNotExist(err) {
-		tool.test.Logf(f, tool.path())
+		t.test.Logf(f, t.path())
 		return nil
 	} else if err != nil {
-		tool.test.Fatalf("golden: %s", err)
+		t.test.Fatalf("golden: %s", err)
 	}
 
 	return bs
@@ -192,99 +192,99 @@ func (tool Tool) Read() (bs []byte) {
 // Run is a functional that automates the process of reading the input file
 // of the test bytes and the execution of the input function of testing and
 // checking the results.
-func (tool Tool) Run(do func(input []byte) (got []byte, err error)) {
-	bs, err := do(tool.SetTarget(Input).Read())
-	tool.ok(err)
-	tool.Assert(bs)
+func (t Tool) Run(do func(input []byte) (got []byte, err error)) {
+	bs, err := do(t.SetTarget(Input).Read())
+	t.ok(err)
+	t.Assert(bs)
 }
 
 // SetPrefix a prefix value setter.
-func (tool Tool) SetPrefix(prefix string) Tool {
-	tool.prefix = rewrite(prefix)
-	return tool
+func (t Tool) SetPrefix(prefix string) Tool {
+	t.prefix = rewrite(prefix)
+	return t
 }
 
 // SetTarget a target value setter.
-func (tool Tool) SetTarget(tar target) Tool {
-	tool.target = tar
-	return tool
+func (t Tool) SetTarget(tar target) Tool {
+	t.target = tar
+	return t
 }
 
 // SetTest a test value setter in the call chain must be used first
 // to prevent abnormal situations when using other methods.
-func (tool Tool) SetTest(t TestingTB) Tool {
-	tool.test = t
-	return tool
+func (t Tool) SetTest(tb TestingTB) Tool {
+	t.test = tb
+	return t
 }
 
 // Update functional reviewer is the need to update the golden files
 // and doing it.
-func (tool Tool) Update(bs []byte) {
-	if tool.flag == nil || !*tool.flag {
+func (t Tool) Update(bs []byte) {
+	if t.flag == nil || !*t.flag {
 		return
 	}
 
-	tool.test.Logf("golden: updating file: %s", tool.path())
-	tool.write(bs)
+	t.test.Logf("golden: updating file: %s", t.path())
+	t.write(bs)
 }
 
 // write is a functional for writing both input and golden files using
 // the appropriate target.
-func (tool Tool) write(bs []byte) {
-	path := tool.path()
-	tool.mkdir(filepath.Dir(path))
-	tool.test.Logf("golden: start write to file: %s", path)
+func (t Tool) write(bs []byte) {
+	path := t.path()
+	t.mkdir(filepath.Dir(path))
+	t.test.Logf("golden: start write to file: %s", path)
 	if bs == nil {
-		tool.test.Logf("golden: nil value will not be written")
-		fileInfo, err := tool.stat(path)
+		t.test.Logf("golden: nil value will not be written")
+		fileInfo, err := t.stat(path)
 		if err == nil && !fileInfo.IsDir() {
-			tool.test.Logf("golden: current test bytes file will be deleted")
-			tool.ok(tool.remove(path))
+			t.test.Logf("golden: current test bytes file will be deleted")
+			t.ok(t.remove(path))
 		}
 		if !os.IsNotExist(err) {
-			tool.ok(err)
+			t.ok(err)
 		}
 	} else {
-		tool.ok(tool.writeFile(path, bs, tool.fileMode))
+		t.ok(t.writeFile(path, bs, t.fileMode))
 	}
 }
 
 // mkdir the mechanism to create the directory.
-func (tool Tool) mkdir(loc string) {
-	fileInfo, err := tool.stat(loc)
+func (t Tool) mkdir(loc string) {
+	fileInfo, err := t.stat(loc)
 	switch {
 	case err != nil && os.IsNotExist(err):
-		tool.test.Logf("golden: trying to create a directory: %q", loc)
-		err = tool.mkdirAll(loc, tool.modeDir)
+		t.test.Logf("golden: trying to create a directory: %q", loc)
+		err = t.mkdirAll(loc, t.modeDir)
 	case err == nil && !fileInfo.IsDir():
-		tool.test.Errorf("golden: test dir is a file: %s", loc)
+		t.test.Errorf("golden: test dir is a file: %s", loc)
 	}
 
-	tool.ok(err)
+	t.ok(err)
 }
 
 // ok fails the test if an err is not nil.
-func (tool Tool) ok(err error) {
+func (t Tool) ok(err error) {
 	if err != nil {
-		tool.test.Fatalf("golden: %s", err)
+		t.test.Fatalf("golden: %s", err)
 	}
 }
 
 // path is getter to get the path to the file containing the test data.
-func (tool Tool) path() (path string) {
+func (t Tool) path() (path string) {
 	format := "%s"
-	args := []interface{}{tool.test.Name()}
+	args := []interface{}{t.test.Name()}
 
-	if tool.prefix != "" {
-		args = append(args, tool.prefix)
+	if t.prefix != "" {
+		args = append(args, t.prefix)
 	}
 
 	// Add a target extansion. Always added last.
-	args = append(args, tool.target.String())
+	args = append(args, t.target.String())
 	// We add placeholders for the number of parameters excluding the name
 	// of the test to print all the parameters.
 	format += strings.Repeat(".%s", len(args)-1)
-	return filepath.Join(tool.dir, fmt.Sprintf(format, args...))
+	return filepath.Join(t.dir, fmt.Sprintf(format, args...))
 }
 
 // rewrite rewrites a subname to having only printable characters and no white
