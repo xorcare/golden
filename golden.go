@@ -279,7 +279,7 @@ func (t Tool) path() (path string) {
 		args = append(args, t.prefix)
 	}
 
-	// Add a target extansion. Always added last.
+	// Add a target expansion. Always added last.
 	args = append(args, t.target.String())
 	// We add placeholders for the number of parameters excluding the name
 	// of the test to print all the parameters.
