@@ -108,4 +108,7 @@ checkstate: tools ## Checking the relevance of dependencies, and tools. Also, th
 	@echo 'checking the relevance of the committed generated files'
 	@go generate
 	@exit $$(git status -s | wc -l)
+	@echo 'checking the relevance of the committed golden files'
+	@make testup
+	@exit $$(git status -s | wc -l)
 	@go mod verify
