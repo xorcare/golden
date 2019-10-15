@@ -77,7 +77,7 @@ type Tool struct {
 // tool object with predefined parameters intended for use in global
 // functions that provide a simplified api for convenient interaction
 // with the functionality of the package.
-var tool = Tool{
+var _golden = Tool{
 	// dir testdata is the directory for test data already accepted
 	// in the standard library, which is also ignored by standard
 	// go tools and should not change in your tests.
@@ -94,7 +94,7 @@ var tool = Tool{
 }
 
 func init() {
-	tool.flag = flag.Bool("update", false, "update test golden files")
+	_golden.flag = flag.Bool("update", false, "update test golden files")
 }
 
 // Assert is a tool to compare the actual value obtained in the test and
@@ -104,7 +104,7 @@ func Assert(t TestingTB, got []byte) {
 	if h, ok := t.(testingHelper); ok {
 		h.Helper()
 	}
-	tool.SetTest(t).Assert(got)
+	_golden.SetTest(t).Assert(got)
 }
 
 // Equal is a tool to compare the actual value obtained in the test and
@@ -114,26 +114,26 @@ func Equal(t TestingTB, got []byte) Conclusion {
 	if h, ok := t.(testingHelper); ok {
 		h.Helper()
 	}
-	return tool.SetTest(t).Equal(got)
+	return _golden.SetTest(t).Equal(got)
 }
 
 // Read is a functional for reading both input and golden files using
 // the appropriate target.
 func Read(t TestingTB) []byte {
-	return tool.SetTest(t).SetTarget(Input).Read()
+	return _golden.SetTest(t).SetTarget(Input).Read()
 }
 
 // Run is a functional that automates the process of reading the input file
 // of the test bytes and the execution of the input function of testing and
 // checking the results.
 func Run(t TestingTB, do func(input []byte) (outcome []byte, err error)) {
-	tool.SetTest(t).Run(do)
+	_golden.SetTest(t).Run(do)
 }
 
 // SetTest is a mechanism to create a new copy of the base Tool object for
 // advanced use. This method replaces the constructor for the Tool structure.
 func SetTest(t TestingTB) Tool {
-	return tool.SetTest(t)
+	return _golden.SetTest(t)
 }
 
 // Assert is a tool to compare the actual value obtained in the test and

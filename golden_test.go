@@ -15,11 +15,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var helper = tool
+// _goldie is used for as a tool golden, but inside tests.
+var _goldie = _golden
 
 func TestMain(m *testing.M) {
-	helper.flag = tool.flag
-	tool.flag = nil
+	_goldie.flag = _golden.flag
+	_golden.flag = nil
 	os.Exit(m.Run())
 }
 
@@ -89,10 +90,10 @@ func TestAssert(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			origin := tool
-			defer func() { tool = origin }()
+			origin := _golden
+			defer func() { _golden = origin }()
 
-			tool.readFile = func(filename string) (bytes []byte, e error) {
+			_golden.readFile = func(filename string) (bytes []byte, e error) {
 				t.Logf(`os.ReadFile(%q) `, filename)
 				return tt.readFile.bytes, tt.readFile.error
 			}
@@ -100,7 +101,7 @@ func TestAssert(t *testing.T) {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				helper.SetTest(t).Assert(tt.args.test.Bytes())
+				_goldie.SetTest(t).Assert(tt.args.test.Bytes())
 			}()
 			tt.args.test.name = t.Name()
 			Assert(tt.args.test, tt.args.got)
@@ -162,19 +163,19 @@ func TestRead(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			origin := tool
-			defer func() { tool = origin }()
+			origin := _golden
+			defer func() { _golden = origin }()
 
-			tool.readFile = func(filename string) (bytes []byte, e error) {
+			_golden.readFile = func(filename string) (bytes []byte, e error) {
 				t.Logf(`os.ReadFile(%q) `, filename)
-				helper.SetTest(t).SetPrefix("filename").Assert([]byte(filename))
+				_goldie.SetTest(t).SetPrefix("filename").Assert([]byte(filename))
 				return tt.readFile.bytes, tt.readFile.error
 			}
 			defer func() {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				helper.SetTest(t).Assert(tt.args.test.Bytes())
+				_goldie.SetTest(t).Assert(tt.args.test.Bytes())
 			}()
 			tt.args.test.name = t.Name()
 			got := Read(tt.args.test)
@@ -218,10 +219,10 @@ func TestRun(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			origin := tool
-			defer func() { tool = origin }()
+			origin := _golden
+			defer func() { _golden = origin }()
 
-			tool.readFile = func(filename string) (bytes []byte, e error) {
+			_golden.readFile = func(filename string) (bytes []byte, e error) {
 				t.Logf(`os.ReadFile(%q)`, filename)
 				return nil, nil
 			}
@@ -229,7 +230,7 @@ func TestRun(t *testing.T) {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				helper.SetTest(t).Assert(tt.args.test.Bytes())
+				_goldie.SetTest(t).Assert(tt.args.test.Bytes())
 			}()
 			tt.args.test.name = t.Name()
 			Run(tt.args.test, tt.args.do)
@@ -260,8 +261,8 @@ func TestSetTest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			origin := tool
-			defer func() { tool = origin }()
+			origin := _golden
+			defer func() { _golden = origin }()
 
 			if got := SetTest(tt.args.test); got.test != tt.want.test {
 				t.Errorf("SetTest() = %v, want %v", got.test, tt.want.test)
@@ -341,7 +342,7 @@ func TestTool_Assert(t *testing.T) {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				helper.SetTest(t).Assert(tt.test.Bytes())
+				_goldie.SetTest(t).Assert(tt.test.Bytes())
 			}()
 			tt.test.name = t.Name()
 			tt.tool.SetTest(&tt.test).Assert(tt.args.got)
@@ -363,32 +364,32 @@ func TestTool_path(t *testing.T) {
 		},
 		{
 			name: "default",
-			tool: tool,
+			tool: _golden,
 			path: "testdata/TestTool_path/default.golden",
 		},
 		{
 			name: "path-target-input",
-			tool: tool.SetTarget(Input),
+			tool: _golden.SetTarget(Input),
 			path: "testdata/TestTool_path/path-target-input.input",
 		},
 		{
 			name: "path-target-golden",
-			tool: tool.SetTarget(Golden),
+			tool: _golden.SetTarget(Golden),
 			path: "testdata/TestTool_path/path-target-golden.golden",
 		},
 		{
 			name: "path-target-input-prefix-gold",
-			tool: tool.SetTarget(Input).SetPrefix("gold"),
+			tool: _golden.SetTarget(Input).SetPrefix("gold"),
 			path: "testdata/TestTool_path/path-target-input-prefix-gold.gold.input",
 		},
 		{
 			name: "path-target-golden-prefix-gold",
-			tool: tool.SetTarget(Golden).SetPrefix("gold"),
+			tool: _golden.SetTarget(Golden).SetPrefix("gold"),
 			path: "testdata/TestTool_path/path-target-golden-prefix-gold.gold.golden",
 		},
 		{
 			name: "path-prefix-with-spaces",
-			tool: tool.SetTarget(Golden).SetPrefix("path prefix with spaces"),
+			tool: _golden.SetTarget(Golden).SetPrefix("path prefix with spaces"),
 			path: "testdata/TestTool_path/path-prefix-with-spaces.path_prefix_with_spaces.golden",
 		},
 	}
@@ -469,7 +470,7 @@ func TestTool_Read(t *testing.T) {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				helper.SetTest(t).Assert(tt.args.test.Bytes())
+				_goldie.SetTest(t).Assert(tt.args.test.Bytes())
 			}()
 			got := tt.tool.SetTest(tt.args.test).SetTarget(tt.args.tar).Read()
 			if !bytes.Equal(got, tt.want) {
@@ -518,7 +519,7 @@ func TestTool_Run(t *testing.T) {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				helper.SetTest(t).Assert(tt.test.Bytes())
+				_goldie.SetTest(t).Assert(tt.test.Bytes())
 			}()
 			tt.tool.SetTest(&tt.test).Run(tt.args.do)
 
@@ -764,7 +765,7 @@ func TestTool_write(t *testing.T) {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				helper.SetTest(t).Assert(tt.args.test.Bytes())
+				_goldie.SetTest(t).Assert(tt.args.test.Bytes())
 			}()
 			tt.tool.SetTest(tt.args.test).
 				SetTarget(tt.args.tar).
@@ -793,7 +794,7 @@ func TestTool_mkdir(t *testing.T) {
 		{
 			name: "fatality-error",
 			args: args{
-				loc: filepath.Dir(tool.SetTest(t).path()),
+				loc: filepath.Dir(_golden.SetTest(t).path()),
 			},
 			stat: stat{
 				error: os.ErrPermission,
@@ -803,7 +804,7 @@ func TestTool_mkdir(t *testing.T) {
 		{
 			name: "error-file-does-not-exist",
 			args: args{
-				loc: filepath.Dir(tool.SetTest(t).path()),
+				loc: filepath.Dir(_golden.SetTest(t).path()),
 			},
 			stat: stat{
 				error: os.ErrNotExist,
@@ -813,7 +814,7 @@ func TestTool_mkdir(t *testing.T) {
 		{
 			name: "error-dir-is-a-file",
 			args: args{
-				loc: tool.SetTest(t).path(),
+				loc: _golden.SetTest(t).path(),
 			},
 			stat: stat{
 				fileInfo: new(FakeStat),
@@ -839,7 +840,7 @@ func TestTool_mkdir(t *testing.T) {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				helper.SetTest(t).Assert(tt.test.Bytes())
+				_goldie.SetTest(t).Assert(tt.test.Bytes())
 			}()
 			tt.test.name = t.Name()
 			tt.tool.SetTest(&tt.test).mkdir(tt.args.loc)
@@ -879,7 +880,7 @@ func TestTool_ok(t *testing.T) {
 				if r := recover(); (r == nil) == tt.recover {
 					t.Error(r)
 				}
-				helper.SetTest(t).Assert(tt.test.Bytes())
+				_goldie.SetTest(t).Assert(tt.test.Bytes())
 			}()
 			tt.test.name = t.Name()
 			tt.tool.SetTest(&tt.test).ok(tt.args.err)
@@ -1067,7 +1068,7 @@ func TestTool_Equal(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tb := &bufferTB{name: t.Name()}
-			tool := tool.SetTest(tb)
+			tool := _golden.SetTest(tb)
 			tool.mkdirAll = func(path string, perm os.FileMode) error { return nil }
 			tool.readFile = helperOSReadFile(t, tt.expected, nil)
 
@@ -1083,7 +1084,7 @@ func TestTool_Equal(t *testing.T) {
 				})
 			}
 			if assert.Equal(t, tt.failed, conclusion.Failed()) {
-				helper.SetTest(t).Equal(tb.Bytes()).FailNow()
+				_goldie.SetTest(t).Equal(tb.Bytes()).FailNow()
 			}
 		})
 	}
@@ -1150,12 +1151,12 @@ func TestEqual(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			origin := tool
-			defer func() { tool = origin }()
+			origin := _golden
+			defer func() { _golden = origin }()
 
 			tb := &bufferTB{name: t.Name()}
-			tool.mkdirAll = func(path string, perm os.FileMode) error { return nil }
-			tool.readFile = helperOSReadFile(t, tt.expected, nil)
+			_golden.mkdirAll = func(path string, perm os.FileMode) error { return nil }
+			_golden.readFile = helperOSReadFile(t, tt.expected, nil)
 
 			conclusion := Equal(tb, tt.actual)
 			conclusion.Fail()
@@ -1169,7 +1170,7 @@ func TestEqual(t *testing.T) {
 				})
 			}
 			if assert.Equal(t, tt.failed, conclusion.Failed()) {
-				helper.SetTest(t).Equal(tb.Bytes()).FailNow()
+				_goldie.SetTest(t).Equal(tb.Bytes()).FailNow()
 			}
 		})
 	}
