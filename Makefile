@@ -59,7 +59,8 @@ static: imports vet lint ## Run static checks (lint, imports, vet, ...) all over
 
 .PHONY: test
 test: ## Run unit tests
-	@go test `go list ./... | grep -v /vendor/` -coverprofile=$(COVER_FILE) -covermode=atomic $d
+	@go test `go list ./... | grep -v /vendor/` -count=1 -race
+	@go test `go list ./... | grep -v /vendor/` -count=1 -coverprofile=$(COVER_FILE) -covermode=atomic $d
 	@go tool cover -func=$(COVER_FILE) | grep ^total
 
 .PHONY: testin
