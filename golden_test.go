@@ -384,6 +384,14 @@ func TestTool_path(t *testing.T) {
 			tool: _golden.SetTarget(Golden).SetPrefix("prefix with spaces"),
 			path: "testdata/TestTool_path/#06.prefix_with_spaces.golden",
 		},
+		{
+			tool: _golden.setExtension("extension").SetTarget(Input).SetPrefix("prefix"),
+			path: "testdata/TestTool_path/#07.prefix.extension.input",
+		},
+		{
+			tool: _golden.setExtension("extension").SetTarget(Golden).SetPrefix("prefix"),
+			path: "testdata/TestTool_path/#08.prefix.extension.golden",
+		},
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
@@ -1123,4 +1131,114 @@ func helperOSReadFile(t testing.TB, content []byte, err error) func(string) ([]b
 		t.Logf("os.ReadFile.error: %v", err)
 		return bs, err
 	}
+}
+
+func Test_jsonFormatter(t *testing.T) {
+	tests := []struct {
+		name string
+		json string
+		want string
+	}{
+		{
+			json: `{}`,
+			want: `{}`,
+		},
+		{
+			json: `{"data":null}`,
+			want: "{\n\t\"data\": null\n}",
+		},
+		{
+			json: `{"data":{}}`,
+			want: "{\n\t\"data\": {}\n}",
+		},
+		{
+			json: `{"array":[null,null]}`,
+			want: "{\n\t\"array\": [\n\t\tnull,\n\t\tnull\n\t]\n}",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			json := jsonFormatter(t, tt.json)
+			t.Logf("\n%s", json)
+			assert.Equal(t, tt.want, json)
+		})
+	}
+
+	t.Run("error", func(t *testing.T) {
+		tb := &bufferTB{name: t.Name()}
+		assert.Panics(t, func() {
+			jsonFormatter(tb, "")
+		})
+		_goldie.SetTest(t).Equal(tb.Bytes()).FailNow()
+	})
+}
+
+func TestTool_JSONEq(t *testing.T) {
+	tests := []struct {
+		name     string
+		actual   string
+		expected string
+		failed   bool
+	}{
+		{
+			name:     "Succeeded",
+			actual:   "{}",
+			expected: `{}`,
+			failed:   false,
+		},
+		{
+			name:     "Failed",
+			actual:   "{}",
+			expected: `{"data":null}`,
+			failed:   true,
+		},
+		{
+			name:   "unexpected end of JSON input",
+			actual: "",
+			failed: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tb := &bufferTB{name: t.Name()}
+			tl := SetTest(tb)
+			tl.readFile = helperOSReadFile(t, []byte(tt.expected), nil)
+
+			cl := tl.JSONEq(tt.actual)
+			cl.Fail()
+			if cl.Failed() {
+				assert.Panics(t, func() { cl.FailNow() })
+			} else {
+				assert.NotPanics(t, func() { cl.FailNow() })
+			}
+			assert.Equal(t, tt.failed, cl.Failed())
+			_goldie.SetTest(t).Equal(tb.Bytes()).Fail()
+		})
+	}
+
+	t.Run("check-for-updates", func(t *testing.T) {
+		actual := []byte("{}")
+		tb := &bufferTB{name: t.Name()}
+		tl := SetTest(tb)
+		tl.flag = new(bool)
+		*tl.flag = true
+		tl.readFile = helperOSReadFile(t, actual, nil)
+		tl.writeFile = func(name string, data []byte, mode os.FileMode) error {
+			assert.Equal(t, name, "testdata/TestTool_JSONEq/check-for-updates.json.golden")
+			assert.Equal(t, actual, data)
+			assert.Equal(t, tl.fileMode, mode)
+			return nil
+		}
+		tl.mkdirAll = func(string, os.FileMode) error { return nil }
+
+		cl := tl.JSONEq(string(actual))
+		cl.Fail()
+		if cl.Failed() {
+			assert.Panics(t, func() { cl.FailNow() })
+		} else {
+			assert.NotPanics(t, func() { cl.FailNow() })
+		}
+		assert.Equal(t, false, cl.Failed())
+		_goldie.SetTest(t).Equal(tb.Bytes()).Fail()
+	})
 }

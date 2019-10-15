@@ -1,0 +1,4 @@
+golden_test: method called *golden.bufferTB.Helper()
+golden: updating file: testdata/TestTool_JSONEq/check-for-updates.json.golden
+golden_test: method called *golden.bufferTB.Helper()
+golden: start write to file: testdata/TestTool_JSONEq/check-for-updates.json.golden
