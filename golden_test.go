@@ -528,30 +528,26 @@ func TestTool_Run(t *testing.T) {
 }
 
 func TestTool_SetTarget(t *testing.T) {
-	type args struct {
-		tar target
-	}
 	tests := []struct {
-		name string
-		tool Tool
-		args args
-		want Tool
+		name   string
+		tool   Tool
+		target target
+		want   Tool
 	}{
 		{
-			name: "set-input-target",
-			args: args{
-				tar: Input,
-			},
-			want: Tool{
-				target: Input,
-			},
+			name:   "set-input-target",
+			target: Input,
+			want:   Tool{target: Input},
+		},
+		{
+			name:   "set-golden-target",
+			target: Golden,
+			want:   Tool{target: Golden},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.tool.SetTarget(tt.args.tar); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Tool.SetTarget() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(t, tt.want, tt.tool.SetTarget(tt.target))
 		})
 	}
 }
