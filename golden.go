@@ -5,6 +5,7 @@
 package golden
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -37,13 +38,14 @@ type testingHelper interface {
 // on the basis of the state or change any parameter by creating
 // a new copy of the state.
 type Tool struct {
-	test     TestingTB
-	dir      string
-	fileMode os.FileMode
-	modeDir  os.FileMode
-	target   target
-	flag     *bool
-	prefix   string
+	test      TestingTB
+	dir       string
+	fileMode  os.FileMode
+	modeDir   os.FileMode
+	target    target
+	flag      *bool
+	prefix    string
+	extension string
 
 	mkdirAll  func(path string, perm os.FileMode) error
 	readFile  func(filename string) ([]byte, error)
@@ -151,6 +153,30 @@ func (t Tool) Equal(actual []byte) Conclusion {
 	return c
 }
 
+// JSONEq is a tool to compare the actual JSON value obtained in the test and
+// the value from the golden file. Also, built-in functionality for
+// updating golden files using the command line flag.
+func (t Tool) JSONEq(actual string) Conclusion {
+	if h, ok := t.test.(testingHelper); ok {
+		h.Helper()
+	}
+
+	return t.jsonEqual(actual)
+}
+
+func (t Tool) jsonEqual(actual string) conclusion {
+	t.setExtension("json").update(func() []byte {
+		return []byte(jsonFormatter(t.test, actual))
+	})
+
+	expected := t.setExtension("json").SetTarget(Golden).Read()
+	i := new(interceptor)
+	c := newConclusion(t.test)
+	c.successful = assert.JSONEq(i, string(expected), string(actual))
+	c.diff = i
+	return c
+}
+
 // Read is a functional for reading both input and golden files using
 // the appropriate target.
 func (t Tool) Read() (bs []byte) {
@@ -198,12 +224,7 @@ func (t Tool) SetTest(tb TestingTB) Tool {
 // Update functional reviewer is the need to update the golden files
 // and doing it.
 func (t Tool) Update(bs []byte) {
-	if t.flag == nil || !*t.flag {
-		return
-	}
-
-	t.test.Logf("golden: updating file: %s", t.path())
-	t.write(bs)
+	t.update(func() []byte { return bs })
 }
 
 // write is a functional for writing both input and golden files using
@@ -256,6 +277,9 @@ func (t Tool) path() (path string) {
 	if t.prefix != "" {
 		args = append(args, t.prefix)
 	}
+	if t.extension != "" {
+		args = append(args, t.extension)
+	}
 
 	// Add a target expansion. Always added last.
 	args = append(args, t.target.String())
@@ -263,6 +287,18 @@ func (t Tool) path() (path string) {
 	// of the test to print all the parameters.
 	format += strings.Repeat(".%s", len(args)-1)
 	return filepath.Join(t.dir, fmt.Sprintf(format, args...))
+}
+
+func (t Tool) update(f func() []byte) {
+	if t.flag != nil && *t.flag {
+		t.test.Logf("golden: updating file: %s", t.path())
+		t.write(f())
+	}
+}
+
+func (t Tool) setExtension(ext string) Tool {
+	t.extension = ext
+	return t
 }
 
 // rewrite rewrites a subname to having only printable characters and no white
@@ -280,5 +316,18 @@ func rewrite(str string) string {
 			bs = append(bs, string(b)...)
 		}
 	}
+	return string(bs)
+}
+
+func jsonFormatter(t TestingTB, str string) string {
+	var value interface{}
+	if err := json.Unmarshal([]byte(str), &value); err != nil {
+		const format = "Data (%q) needs to be valid json.\nJSON parsing error: %q"
+		assert.FailNow(t, fmt.Sprintf(format, str, err))
+	}
+
+	bs, err := json.MarshalIndent(value, "", "\t")
+	assert.NoError(t, err)
+
 	return string(bs)
 }

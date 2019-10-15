@@ -1,0 +1,10 @@
+golden_test: method called *golden.bufferTB.Helper()
+golden_test: method called *golden.bufferTB.Helper()
+
+	Error Trace:
+	Error:      	Data ("") needs to be valid json.
+	            	JSON parsing error: "unexpected end of JSON input"
+	Test:       	Test_jsonFormatter/error
+
+golden_test: method called *golden.bufferTB.Fail()
+golden_test: method called *golden.bufferTB.FailNow()

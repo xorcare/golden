@@ -13,8 +13,12 @@ type bufferTB struct {
 	name string
 }
 
-func (m *bufferTB) Bytes() []byte {
-	return []byte(strings.Join(m.logs, "\n"))
+func (m bufferTB) String() string {
+	return strings.Join(m.logs, "\n")
+}
+
+func (m bufferTB) Bytes() []byte {
+	return []byte(m.String())
 }
 
 func (m *bufferTB) Errorf(format string, args ...interface{}) {
