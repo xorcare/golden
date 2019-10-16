@@ -78,21 +78,21 @@ func init() {
 // Assert is a tool to compare the actual value obtained in the test and
 // the value from the golden file. Also, built-in functionality for
 // updating golden files using the command line flag.
-func Assert(t TestingTB, got []byte) {
+func Assert(t TestingTB, actual []byte) {
 	if h, ok := t.(testingHelper); ok {
 		h.Helper()
 	}
-	SetTest(t).Assert(got)
+	SetTest(t).Assert(actual)
 }
 
 // Equal is a tool to compare the actual value obtained in the test and
 // the value from the golden file. Also, built-in functionality for
 // updating golden files using the command line flag.
-func Equal(t TestingTB, got []byte) Conclusion {
+func Equal(t TestingTB, actual []byte) Conclusion {
 	if h, ok := t.(testingHelper); ok {
 		h.Helper()
 	}
-	return SetTest(t).Equal(got)
+	return SetTest(t).Equal(actual)
 }
 
 // Read is a functional for reading both input and golden files using
@@ -117,12 +117,12 @@ func SetTest(t TestingTB) Tool {
 // Assert is a tool to compare the actual value obtained in the test and
 // the value from the golden file. Also, built-in functionality for
 // updating golden files using the command line flag.
-func (t Tool) Assert(got []byte) {
-	t.Update(got)
+func (t Tool) Assert(actual []byte) {
+	t.Update(actual)
 	if h, ok := t.test.(testingHelper); ok {
 		h.Helper()
 	}
-	t.Equal(got).FailNow()
+	t.Equal(actual).FailNow()
 }
 
 // Equal is a tool to compare the actual value obtained in the test and
@@ -170,7 +170,7 @@ func (t Tool) Read() (bs []byte) {
 // Run is a functional that automates the process of reading the input file
 // of the test bytes and the execution of the input function of testing and
 // checking the results.
-func (t Tool) Run(do func(input []byte) (got []byte, err error)) {
+func (t Tool) Run(do func(input []byte) (actual []byte, err error)) {
 	bs, err := do(t.SetTarget(Input).Read())
 	t.noError(err)
 	t.Assert(bs)
