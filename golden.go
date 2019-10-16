@@ -177,6 +177,17 @@ func (t Tool) jsonEqual(actual string) conclusion {
 	return c
 }
 
+// JSONEq is a tool to compare the actual JSON value obtained in the test and
+// the value from the golden file. Also, built-in functionality for
+// updating golden files using the command line flag.
+func JSONEq(tb TestingTB, actual string) Conclusion {
+	if h, ok := tb.(testingHelper); ok {
+		h.Helper()
+	}
+
+	return _golden.SetTest(tb).jsonEqual(actual)
+}
+
 // Read is a functional for reading both input and golden files using
 // the appropriate target.
 func (t Tool) Read() (bs []byte) {

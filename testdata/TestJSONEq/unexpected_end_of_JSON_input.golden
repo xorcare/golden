@@ -1,0 +1,13 @@
+golden_test: method called *golden.bufferTB.Helper()
+
+	Error Trace:
+	Error:      	Expected value ('') is not valid json.
+	            	JSON parsing error: 'unexpected end of JSON input'
+
+golden_test: method called *golden.bufferTB.Fail()
+
+	Error Trace:
+	Error:      	Expected value ('') is not valid json.
+	            	JSON parsing error: 'unexpected end of JSON input'
+
+golden_test: method called *golden.bufferTB.FailNow()
