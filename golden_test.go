@@ -1242,3 +1242,49 @@ func TestTool_JSONEq(t *testing.T) {
 		_goldie.SetTest(t).Equal(tb.Bytes()).Fail()
 	})
 }
+
+func TestJSONEq(t *testing.T) {
+	tests := []struct {
+		name     string
+		actual   string
+		expected string
+		failed   bool
+	}{
+		{
+			name:     "Succeeded",
+			actual:   "{}",
+			expected: `{}`,
+			failed:   false,
+		},
+		{
+			name:     "Failed",
+			actual:   "{}",
+			expected: `{"data":null}`,
+			failed:   true,
+		},
+		{
+			name:   "unexpected end of JSON input",
+			actual: "",
+			failed: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			origin := _golden
+			defer func() { _golden = origin }()
+
+			tb := &bufferTB{name: t.Name()}
+			_golden.readFile = helperOSReadFile(t, []byte(tt.expected), nil)
+
+			cl := JSONEq(tb, tt.actual)
+			cl.Fail()
+			if cl.Failed() {
+				assert.Panics(t, func() { cl.FailNow() })
+			} else {
+				assert.NotPanics(t, func() { cl.FailNow() })
+			}
+			assert.Equal(t, tt.failed, cl.Failed())
+			_goldie.SetTest(t).Equal(tb.Bytes()).Fail()
+		})
+	}
+}
