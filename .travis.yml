@@ -14,7 +14,11 @@ matrix:
   - go: tip
 
 script:
-- if [ "${TRAVIS_GO_VERSION}" = "1.x" ]; then make ci; else make test; fi;
+- >
+  if [ "${TRAVIS_GO_VERSION}" = "1.x" ];
+  then make ci;
+  else go test ./... -count=1 -race;
+  fi;
 - make build
 
 after_success:
