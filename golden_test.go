@@ -353,51 +353,41 @@ func TestTool_Assert(t *testing.T) {
 
 func TestTool_path(t *testing.T) {
 	tests := []struct {
-		name string
 		path string
 		tool Tool
 	}{
 		{
-			name: "empty",
 			tool: Tool{},
-			path: "TestTool_path/empty.golden",
+			path: "TestTool_path/#00.golden",
 		},
 		{
-			name: "default",
 			tool: _golden,
-			path: "testdata/TestTool_path/default.golden",
+			path: "testdata/TestTool_path/#01.golden",
 		},
 		{
-			name: "path-target-input",
 			tool: _golden.SetTarget(Input),
-			path: "testdata/TestTool_path/path-target-input.input",
+			path: "testdata/TestTool_path/#02.input",
 		},
 		{
-			name: "path-target-golden",
 			tool: _golden.SetTarget(Golden),
-			path: "testdata/TestTool_path/path-target-golden.golden",
+			path: "testdata/TestTool_path/#03.golden",
 		},
 		{
-			name: "path-target-input-prefix-gold",
-			tool: _golden.SetTarget(Input).SetPrefix("gold"),
-			path: "testdata/TestTool_path/path-target-input-prefix-gold.gold.input",
+			tool: _golden.SetTarget(Input).SetPrefix("prefix"),
+			path: "testdata/TestTool_path/#04.prefix.input",
 		},
 		{
-			name: "path-target-golden-prefix-gold",
-			tool: _golden.SetTarget(Golden).SetPrefix("gold"),
-			path: "testdata/TestTool_path/path-target-golden-prefix-gold.gold.golden",
+			tool: _golden.SetTarget(Golden).SetPrefix("prefix"),
+			path: "testdata/TestTool_path/#05.prefix.golden",
 		},
 		{
-			name: "path-prefix-with-spaces",
-			tool: _golden.SetTarget(Golden).SetPrefix("path prefix with spaces"),
-			path: "testdata/TestTool_path/path-prefix-with-spaces.path_prefix_with_spaces.golden",
+			tool: _golden.SetTarget(Golden).SetPrefix("prefix with spaces"),
+			path: "testdata/TestTool_path/#06.prefix_with_spaces.golden",
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.tool.SetTest(t).path(); got != tt.path {
-				t.Fatalf("error want path %q, actual %q", tt.path, got)
-			}
+		t.Run("", func(t *testing.T) {
+			assert.Equal(t, tt.path, tt.tool.SetTest(t).path())
 		})
 	}
 }
