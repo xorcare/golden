@@ -28,8 +28,8 @@ func ExampleAssert() {
 
 // In the current example, when you run the Run function, the data from the
 // `testdata/ExampleRun.input` file will be read and with this data will be
-// called the function which is passed in, as a result of the function
-// execution we will get the `got` data and possibly an error which will
+// called the function, which is passed in, as a result of the function
+// execution we will get the `got` data and possibly an error, which will
 // be processed by the internal method implementation. The `got` will be
 // compared with the meaning `want` which we get from the file
 // `test data/ExampleRun.golden` and after data comparison in case of
