@@ -34,58 +34,15 @@ samples.
 
 ## Installation
 
-To install Golden, use go get:
-
 ```bash
-go get -u github.com/xorcare/golden
-```
-
-Installation with using Go modules
-
-```bash
-go get github.com/xorcare/golden@latest
+go get github.com/xorcare/golden
 ```
 
 ## Examples
 
-**Using** `golden.Assert` - to check and save the data in the golden file.
-
-```go
-func TestDecode(t *testing.T) {
-    got, err := base64.RawURLEncoding.DecodeString("Z29sZGVu")
-    if err != nil {
-        t.Fatal(err)
-    }
-
-    golden.Assert(t, got)
-}
-```
-
-**Using** `golden.Run` - to automatically read the input file, run the
-function you created and compare the results with the golden files.
-
-```go
-func TestDecode(t *testing.T) {
-    golden.Run(t, func(input []byte) (got []byte, err error) {
-        return base64.RawURLEncoding.DecodeString(string(input))
-    })
-}
-```
-
-**Using** `golden.Read` - you can use golden code to create
-your own codebase, such as reading from an input file.
-
-```go
-func TestDecode(t *testing.T) {
-    input := string(golden.Read(t))
-    got, err := base64.RawURLEncoding.DecodeString(input)
-    if err != nil {
-        t.Fatal(err)
-    }
-    
-    golden.Assert(t, got)
-}
-```
+ * [golden.Assert](https://godoc.org/github.com/xorcare/golden#example-Assert)
+ * [golden.Read](https://godoc.org/github.com/xorcare/golden#example-Read)
+ * [golden.Run](https://godoc.org/github.com/xorcare/golden#example-Run)
 
 ## Inspiration
 
