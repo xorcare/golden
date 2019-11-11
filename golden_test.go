@@ -948,59 +948,59 @@ func TestTool_Equal(t *testing.T) {
 	type args struct {
 	}
 	tests := []struct {
-		name     string
-		args     args
-		actual   []byte
-		expected []byte
-		failed   bool
+		name   string
+		args   args
+		got    []byte
+		want   []byte
+		failed bool
 	}{
 		{
-			name:     "successful nil-nil",
-			expected: nil,
-			actual:   nil,
-			failed:   false,
+			name:   "successful nil-nil",
+			want:   nil,
+			got:    nil,
+			failed: false,
 		},
 		{
-			name:     "successful []-[]",
-			expected: []byte{},
-			actual:   []byte{},
-			failed:   false,
+			name:   "successful []-[]",
+			want:   []byte{},
+			got:    []byte{},
+			failed: false,
 		},
 		{
-			name:     "successful golden-golden",
-			expected: []byte("golden"),
-			actual:   []byte("golden"),
-			failed:   false,
+			name:   "successful golden-golden",
+			want:   []byte("golden"),
+			got:    []byte("golden"),
+			failed: false,
 		},
 		{
-			name:     "failure golden-Z29sZGVu",
-			expected: []byte("golden"),
-			actual:   []byte("Z29sZGVu"),
-			failed:   true,
+			name:   "failure golden-Z29sZGVu",
+			want:   []byte("golden"),
+			got:    []byte("Z29sZGVu"),
+			failed: true,
 		},
 		{
-			name:     "failure golden-nil",
-			expected: []byte("golden"),
-			actual:   nil,
-			failed:   true,
+			name:   "failure golden-nil",
+			want:   []byte("golden"),
+			got:    nil,
+			failed: true,
 		},
 		{
-			name:     "failure nil-golden",
-			expected: nil,
-			actual:   []byte("golden"),
-			failed:   true,
+			name:   "failure nil-golden",
+			want:   nil,
+			got:    []byte("golden"),
+			failed: true,
 		},
 		{
-			name:     "failure []-nil",
-			expected: []byte{},
-			actual:   nil,
-			failed:   true,
+			name:   "failure []-nil",
+			want:   []byte{},
+			got:    nil,
+			failed: true,
 		},
 		{
-			name:     "failure nil-[]",
-			expected: nil,
-			actual:   []byte{},
-			failed:   true,
+			name:   "failure nil-[]",
+			want:   nil,
+			got:    []byte{},
+			failed: true,
 		},
 	}
 	for _, tt := range tests {
@@ -1008,9 +1008,9 @@ func TestTool_Equal(t *testing.T) {
 			tb := &bufferTB{name: t.Name()}
 			tool := _golden.SetTest(tb)
 			tool.mkdirAll = func(path string, perm os.FileMode) error { return nil }
-			tool.readFile = helperOSReadFile(t, tt.expected, nil)
+			tool.readFile = helperOSReadFile(t, tt.want, nil)
 
-			conclusion := tool.Equal(tt.actual)
+			conclusion := tool.Equal(tt.got)
 			conclusion.Fail()
 			if conclusion.Failed() {
 				assert.Panics(t, func() {
@@ -1032,59 +1032,59 @@ func TestEqual(t *testing.T) {
 	type args struct {
 	}
 	tests := []struct {
-		name     string
-		args     args
-		actual   []byte
-		expected []byte
-		failed   bool
+		name   string
+		args   args
+		got    []byte
+		want   []byte
+		failed bool
 	}{
 		{
-			name:     "successful nil-nil",
-			expected: nil,
-			actual:   nil,
-			failed:   false,
+			name:   "successful nil-nil",
+			want:   nil,
+			got:    nil,
+			failed: false,
 		},
 		{
-			name:     "successful []-[]",
-			expected: []byte{},
-			actual:   []byte{},
-			failed:   false,
+			name:   "successful []-[]",
+			want:   []byte{},
+			got:    []byte{},
+			failed: false,
 		},
 		{
-			name:     "successful golden-golden",
-			expected: []byte("golden"),
-			actual:   []byte("golden"),
-			failed:   false,
+			name:   "successful golden-golden",
+			want:   []byte("golden"),
+			got:    []byte("golden"),
+			failed: false,
 		},
 		{
-			name:     "failure golden-Z29sZGVu",
-			expected: []byte("golden"),
-			actual:   []byte("Z29sZGVu"),
-			failed:   true,
+			name:   "failure golden-Z29sZGVu",
+			want:   []byte("golden"),
+			got:    []byte("Z29sZGVu"),
+			failed: true,
 		},
 		{
-			name:     "failure golden-nil",
-			expected: []byte("golden"),
-			actual:   nil,
-			failed:   true,
+			name:   "failure golden-nil",
+			want:   []byte("golden"),
+			got:    nil,
+			failed: true,
 		},
 		{
-			name:     "failure nil-golden",
-			expected: nil,
-			actual:   []byte("golden"),
-			failed:   true,
+			name:   "failure nil-golden",
+			want:   nil,
+			got:    []byte("golden"),
+			failed: true,
 		},
 		{
-			name:     "failure []-nil",
-			expected: []byte{},
-			actual:   nil,
-			failed:   true,
+			name:   "failure []-nil",
+			want:   []byte{},
+			got:    nil,
+			failed: true,
 		},
 		{
-			name:     "failure nil-[]",
-			expected: nil,
-			actual:   []byte{},
-			failed:   true,
+			name:   "failure nil-[]",
+			want:   nil,
+			got:    []byte{},
+			failed: true,
 		},
 	}
 	for _, tt := range tests {
@@ -1094,9 +1094,9 @@ func TestEqual(t *testing.T) {
 
 			tb := &bufferTB{name: t.Name()}
 			_golden.mkdirAll = func(path string, perm os.FileMode) error { return nil }
-			_golden.readFile = helperOSReadFile(t, tt.expected, nil)
+			_golden.readFile = helperOSReadFile(t, tt.want, nil)
 
-			conclusion := Equal(tb, tt.actual)
+			conclusion := Equal(tb, tt.got)
 			conclusion.Fail()
 			if conclusion.Failed() {
 				assert.Panics(t, func() {
@@ -1175,26 +1175,26 @@ func Test_jsonFormatter(t *testing.T) {
 
 func TestTool_JSONEq(t *testing.T) {
 	tests := []struct {
-		name     string
-		actual   string
-		expected string
-		failed   bool
+		name   string
+		got    string
+		want   string
+		failed bool
 	}{
 		{
-			name:     "Succeeded",
-			actual:   "{}",
-			expected: `{}`,
-			failed:   false,
+			name:   "Succeeded",
+			got:    "{}",
+			want:   `{}`,
+			failed: false,
 		},
 		{
-			name:     "Failed",
-			actual:   "{}",
-			expected: `{"data":null}`,
-			failed:   true,
+			name:   "Failed",
+			got:    "{}",
+			want:   `{"data":null}`,
+			failed: true,
 		},
 		{
 			name:   "unexpected end of JSON input",
-			actual: "",
+			got:    "",
 			failed: true,
 		},
 	}
@@ -1202,9 +1202,9 @@ func TestTool_JSONEq(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tb := &bufferTB{name: t.Name()}
 			tl := SetTest(tb)
-			tl.readFile = helperOSReadFile(t, []byte(tt.expected), nil)
+			tl.readFile = helperOSReadFile(t, []byte(tt.want), nil)
 
-			cl := tl.JSONEq(tt.actual)
+			cl := tl.JSONEq(tt.got)
 			cl.Fail()
 			if cl.Failed() {
 				assert.Panics(t, func() { cl.FailNow() })
@@ -1217,21 +1217,21 @@ func TestTool_JSONEq(t *testing.T) {
 	}
 
 	t.Run("check-for-updates", func(t *testing.T) {
-		actual := []byte("{}")
+		got := []byte("{}")
 		tb := &bufferTB{name: t.Name()}
 		tl := SetTest(tb)
 		tl.flag = new(bool)
 		*tl.flag = true
-		tl.readFile = helperOSReadFile(t, actual, nil)
+		tl.readFile = helperOSReadFile(t, got, nil)
 		tl.writeFile = func(name string, data []byte, mode os.FileMode) error {
 			assert.Equal(t, name, "testdata/TestTool_JSONEq/check-for-updates.json.golden")
-			assert.Equal(t, actual, data)
+			assert.Equal(t, got, data)
 			assert.Equal(t, tl.fileMode, mode)
 			return nil
 		}
 		tl.mkdirAll = func(string, os.FileMode) error { return nil }
 
-		cl := tl.JSONEq(string(actual))
+		cl := tl.JSONEq(string(got))
 		cl.Fail()
 		if cl.Failed() {
 			assert.Panics(t, func() { cl.FailNow() })
@@ -1245,26 +1245,26 @@ func TestTool_JSONEq(t *testing.T) {
 
 func TestJSONEq(t *testing.T) {
 	tests := []struct {
-		name     string
-		actual   string
-		expected string
-		failed   bool
+		name   string
+		got    string
+		want   string
+		failed bool
 	}{
 		{
-			name:     "Succeeded",
-			actual:   "{}",
-			expected: `{}`,
-			failed:   false,
+			name:   "Succeeded",
+			got:    "{}",
+			want:   `{}`,
+			failed: false,
 		},
 		{
-			name:     "Failed",
-			actual:   "{}",
-			expected: `{"data":null}`,
-			failed:   true,
+			name:   "Failed",
+			got:    "{}",
+			want:   `{"data":null}`,
+			failed: true,
 		},
 		{
 			name:   "unexpected end of JSON input",
-			actual: "",
+			got:    "",
 			failed: true,
 		},
 	}
@@ -1274,9 +1274,9 @@ func TestJSONEq(t *testing.T) {
 			defer func() { _golden = origin }()
 
 			tb := &bufferTB{name: t.Name()}
-			_golden.readFile = helperOSReadFile(t, []byte(tt.expected), nil)
+			_golden.readFile = helperOSReadFile(t, []byte(tt.want), nil)
 
-			cl := JSONEq(tb, tt.actual)
+			cl := JSONEq(tb, tt.got)
 			cl.Fail()
 			if cl.Failed() {
 				assert.Panics(t, func() { cl.FailNow() })
