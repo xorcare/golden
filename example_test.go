@@ -2,13 +2,17 @@ package golden_test
 
 import (
 	"encoding/base64"
-	"testing"
+	"fmt"
+	"path"
+	"regexp"
+	"runtime"
+	"strings"
+	"unicode"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/xorcare/golden"
 )
-
-// It is necessary for the syntactic correctness of the examples.
-var t = &testing.T{}
 
 // In the current example, the value of `got` will be compared with the value
 // of `want` that we get from the file `testdata/ExampleAssert.golden` and
@@ -18,12 +22,28 @@ var t = &testing.T{}
 //
 // The test name is assumed to be equal to ExampleAssert.
 func ExampleAssert() {
+	t := newTestingT()
+
 	got, err := base64.RawURLEncoding.DecodeString("Z29sZGVu")
-	if err != nil {
-		t.Fatalf("%s", err)
-	}
+	assert.NoError(t, err)
 
 	golden.Assert(t, got)
+
+	// Output:
+	// golden: read the value of nil since it is not found file: testdata/TestExamples/ExampleAssert.golden
+	//
+	// Error Trace:
+	// Error:      Not equal:
+	//             expected: "[]byte(nil)"
+	//             actual  : "golden"
+	//
+	//             Diff:
+	//             --- Expected
+	//             +++ Actual
+	//             @@ -1 +1 @@
+	//             -[]byte(nil)
+	//             +golden
+
 }
 
 // In the current example, when you run the Run function, the data from the
@@ -38,9 +58,26 @@ func ExampleAssert() {
 //
 // The test name is assumed to be equal to ExampleRun.
 func ExampleRun() {
+	t := newTestingT()
+
 	golden.Run(t, func(input []byte) (got []byte, err error) {
 		return base64.RawURLEncoding.DecodeString(string(input))
 	})
+	// Output:
+	// golden: read the value of nil since it is not found file: testdata/TestExamples/ExampleRun.input
+	// golden: read the value of nil since it is not found file: testdata/TestExamples/ExampleRun.golden
+	//
+	// Error Trace:
+	// Error:      Not equal:
+	//             expected: "[]byte(nil)"
+	//             actual  : ""
+	//
+	//             Diff:
+	//             --- Expected
+	//             +++ Actual
+	//             @@ -1 +1 @@
+	//             -[]byte(nil)
+	//             +
 }
 
 // ExampleRead the example shows how you can use the global api to read files
@@ -48,11 +85,77 @@ func ExampleRun() {
 //
 // The test name is assumed to be equal to ExampleRead.
 func ExampleRead() {
+	t := newTestingT()
+
 	input := string(golden.Read(t))
 	got, err := base64.RawURLEncoding.DecodeString(input)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 
 	golden.Assert(t, got)
+
+	// Output:
+	// golden: read the value of nil since it is not found file: testdata/TestExamples/ExampleRead.input
+	// golden: read the value of nil since it is not found file: testdata/TestExamples/ExampleRead.golden
+	//
+	// Error Trace:
+	// Error:      Not equal:
+	//             expected: "[]byte(nil)"
+	//             actual  : ""
+	//
+	//             Diff:
+	//             --- Expected
+	//             +++ Actual
+	//             @@ -1 +1 @@
+	//             -[]byte(nil)
+	//             +
+}
+
+type T struct {
+	name string
+}
+
+func (t *T) Fail()    {}
+func (t *T) FailNow() {}
+func (t *T) Helper()  {}
+
+func (t T) Name() string { return t.name }
+
+func (t *T) Errorf(format string, args ...interface{}) { t.Logf(format, args...) }
+func (t *T) Fatalf(format string, args ...interface{}) { t.Logf(format, args...) }
+
+func (t *T) Logf(format string, args ...interface{}) {
+	msg := fmt.Sprintf(format, args...)
+	// Removed the trace, it contains line numbers and changes dynamically,
+	// it is not convenient to see in the examples.
+	re := regexp.MustCompile(`(?im)Error Trace:([\w\s:.]+)Error:`)
+	msg = re.ReplaceAllString(msg, "Error Trace:\n\tError:")
+
+	msg = strings.Replace(msg, "\t", "", -1)
+
+	// Trimming lines consisting only of spaces or containing spaces to the right.
+	re = regexp.MustCompile(`(?im)^(.*)$`)
+	msg = re.ReplaceAllStringFunc(msg, func(s string) string {
+		return strings.TrimRightFunc(s, unicode.IsSpace)
+	})
+
+	fmt.Println(msg)
+}
+
+func newTestingT() *T {
+	t := T{name: "TestExamples"}
+	t.name = path.Join(t.name, caller(2))
+	return &t
+}
+
+func caller(skip int) string {
+	pc, _, _, ok := runtime.Caller(skip)
+	if !ok {
+		panic(fmt.Sprintf("Couldn't get the caller info level: %d", skip))
+	}
+
+	fp := runtime.FuncForPC(pc).Name()
+	parts := strings.Split(fp, ".")
+	fn := parts[len(parts)-1]
+
+	return fn
 }
