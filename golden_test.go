@@ -476,6 +476,12 @@ func TestTool_Read(t *testing.T) {
 			}
 		})
 	}
+	t.Run("with-set-want-field", func(t *testing.T) {
+		tb := &bufferTB{name: t.Name()}
+		tool := SetWant(tb, []byte(t.Name()))
+		assert.Equal(t, t.Name(), string(tool.Read()))
+		_goldie.SetTest(t).Assert(tb.Bytes())
+	})
 }
 
 func TestTool_Run(t *testing.T) {

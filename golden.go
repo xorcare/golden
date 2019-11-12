@@ -46,6 +46,10 @@ type Tool struct {
 	flag      *bool
 	prefix    string
 	extension string
+	// want it stores manually set expected data, if it is nil, then the
+	// data will be read from the files, otherwise the value from this
+	// field will be taken.
+	want []byte
 
 	mkdirAll  func(path string, perm os.FileMode) error
 	readFile  func(filename string) ([]byte, error)
@@ -114,6 +118,14 @@ func Run(t TestingTB, do func(input []byte) (outcome []byte, err error)) {
 // advanced use. This method replaces the constructor for the Tool structure.
 func SetTest(t TestingTB) Tool {
 	return _golden.SetTest(t)
+}
+
+// SetWant a place to set the expected want manually.
+// want value it stores manually set expected data, if it is nil,
+// then the data will be read from the files, otherwise the value
+// from this field will be taken.
+func SetWant(t TestingTB, bs []byte) Tool {
+	return _golden.SetTest(t).SetWant(bs)
 }
 
 // Assert is a tool to compare the actual value obtained in the test and
@@ -191,10 +203,17 @@ func JSONEq(tb TestingTB, got string) Conclusion {
 // Read is a functional for reading both input and golden files using
 // the appropriate target.
 func (t Tool) Read() (bs []byte) {
-	const f = "golden: read the value of nil since it is not found file: %s"
+	if t.want != nil {
+		t.test.Logf("golden: read the value from the want field")
+		bs = make([]byte, len(t.want))
+		copy(bs, t.want)
+
+		return bs
+	}
 
 	bs, err := t.readFile(t.path())
 	if os.IsNotExist(err) {
+		const f = "golden: read the value of nil since it is not found file: %s"
 		t.test.Logf(f, t.path())
 		return nil
 	} else if err != nil {
@@ -229,6 +248,20 @@ func (t Tool) SetTarget(tar target) Tool {
 // to prevent abnormal situations when using other methods.
 func (t Tool) SetTest(tb TestingTB) Tool {
 	t.test = tb
+	return t
+}
+
+// SetWant a place to set the expected want manually.
+// want value it stores manually set expected data, if it is nil,
+// then the data will be read from the files, otherwise the value
+// from this field will be taken.
+func (t Tool) SetWant(bs []byte) Tool {
+	t.want = nil
+	if bs != nil {
+		t.want = make([]byte, len(bs))
+		copy(t.want, bs)
+	}
+
 	return t
 }
 
