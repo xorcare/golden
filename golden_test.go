@@ -1294,3 +1294,25 @@ func TestJSONEq(t *testing.T) {
 		})
 	}
 }
+
+func Test_getUpdateEnv(t *testing.T) {
+	t.Run("received false", func(t *testing.T) {
+		assert.NoError(t, os.Setenv(updateEnvName, "false"))
+		assert.False(t, getUpdateEnv())
+	})
+	t.Run("received true", func(t *testing.T) {
+		assert.NoError(t, os.Setenv(updateEnvName, "true"))
+		assert.True(t, getUpdateEnv())
+	})
+	t.Run("parsing error", func(t *testing.T) {
+		assert.NoError(t, os.Setenv(updateEnvName, "folse"))
+		const expected = "cannot parse flag \"GOLDEN_UPDATE\", error:" +
+			" strconv.ParseBool: parsing \"folse\": invalid syntax"
+		assert.PanicsWithValue(
+			t, expected,
+			func() {
+				assert.False(t, getUpdateEnv())
+			},
+		)
+	})
+}
