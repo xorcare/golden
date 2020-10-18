@@ -77,8 +77,25 @@ var _golden = Tool{
 	writeFile: ioutil.WriteFile,
 }
 
+const updateEnvName = "GOLDEN_UPDATE"
+
+func getUpdateEnv() bool {
+	env := os.Getenv(updateEnvName)
+	if env == "" {
+		env = strconv.FormatBool(false)
+	}
+
+	is, err := strconv.ParseBool(env)
+	if err != nil {
+		const msg = "cannot parse flag %q, error: %v"
+		panic(fmt.Sprintf(msg, updateEnvName, err))
+	}
+
+	return is
+}
+
 func init() {
-	_golden.flag = flag.Bool("update", false, "update test golden files")
+	_golden.flag = flag.Bool("getUpdateEnv", getUpdateEnv(), "update test golden files")
 }
 
 // Assert is a tool to compare the actual value obtained in the test and
