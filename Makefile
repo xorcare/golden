@@ -21,7 +21,7 @@ build: ## Build the project binary
 	@go build ./...
 
 .PHONY: ci
-ci: check checkstate ## Target for integration with ci pipeline
+ci: check ## Target for integration with ci pipeline
 
 .PHONY: check
 check: static test build ## Check project with static checks and unit tests
@@ -93,19 +93,3 @@ toolsup: ## Update amakll needed tools, e.g. for static checks
 .PHONY: vet
 vet: ## Check the project with vet
 	@go vet ./...
-
-.PHONY: checkstate
-checkstate: tools ## Checking the relevance of dependencies, and tools. Also, the absence of arbitrary changes when performing checks.
-	@echo 'checking the relevance of the dependency list'
-	@go mod tidy
-	@git diff --exit-code go.mod go.sum
-	@echo 'checking the relevance of the committed dependencies'
-	@go mod vendor
-	@git diff --exit-code vendor
-	@echo 'checking the relevance of the committed generated files'
-	@go generate
-	@exit $$(git status -s | wc -l)
-	@echo 'checking the relevance of the committed golden files'
-	@make testup
-	@exit $$(git status -s | wc -l)
-	@go mod verify
