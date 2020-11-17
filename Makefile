@@ -81,7 +81,7 @@ tools: ## Install all needed tools, e.g. for static checks
 	@$(CDTOOLS) go install github.com/vburenin/ifacemaker
 
 .PHONY: toolsup
-toolsup: ## Update all needed tools, e.g. for static checks
+toolsup: ## Update amakll needed tools, e.g. for static checks
 	@$(CDTOOLS) go mod tidy
 	@$(CDTOOLS) go get golang.org/x/lint/golint@latest
 	@$(CDTOOLS) go get golang.org/x/tools/cmd/goimports@latest
