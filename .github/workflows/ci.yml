@@ -1,0 +1,44 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: Build
+    strategy:
+      matrix:
+        go:
+        - '1.15'
+        - '1.14'
+        - '1.13'
+        os:
+        - 'ubuntu-18.04'
+        - 'macos-10.15'
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Set up Go ${{ matrix.go }}
+      uses: actions/setup-go@v1
+      with:
+        go-version: ${{ matrix.go }}
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Installing tools
+      run: make tools
+
+    - name: Running static checks
+      run: |
+        export GOPATH=$HOME/go
+        export GOBIN=$(go env GOPATH)/bin
+        export PATH=$PATH:$GOPATH
+        export PATH=$PATH:$GOBIN
+        mkdir -p $GOPATH/pkg
+        mkdir -p $GOBIN
+        mkdir -p $GOPATH/src/github.com/$GITHUB_REPOSITORY
+        mv $(pwd)/* $GOPATH/src/github.com/$GITHUB_REPOSITORY
+        cd $GOPATH/src/github.com/$GITHUB_REPOSITORY
+        make check
