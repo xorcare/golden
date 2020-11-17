@@ -1,0 +1,40 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go:
+        - '1.15'
+        - '1.14'
+        - '1.13'
+        - '1.12'
+        - '1.11'
+        - '1.8'
+    steps:
+    - name: "Set up Go {{ matrix.go }}"
+      uses: actions/setup-go@v2
+      with:
+        go-version: "{{ matrix.go }}"
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Build
+      run: make build
+
+    - name: Test
+      run:
+      - >
+        if [ "{{ matrix.go }}" = "1.15" ];
+          then make ci;
+          else go test ./... -count=1 -race;
+        fi;
