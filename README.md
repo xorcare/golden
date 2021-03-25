@@ -1,6 +1,5 @@
 # Golden
 
-[![Build Status](https://travis-ci.org/xorcare/golden.svg?branch=master)](https://travis-ci.org/xorcare/golden)
 [![codecov](https://codecov.io/gh/xorcare/golden/badge.svg)](https://codecov.io/gh/xorcare/golden)
 [![Go Report Card](https://goreportcard.com/badge/github.com/xorcare/golden)](https://goreportcard.com/report/github.com/xorcare/golden)
 [![GoDoc](https://godoc.org/github.com/xorcare/golden?status.svg)](https://godoc.org/github.com/xorcare/golden)
@@ -24,7 +23,7 @@ checking the correctness of the new golden results.
 
 A special cli is provided in the package. The special flag `-update` is
 provided in the package for conveniently updating ethos files, for example,
-using the following command: 
+using the following command:
 
 	go test ./... -update
 
