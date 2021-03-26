@@ -45,7 +45,7 @@ go get github.com/xorcare/golden
 
 ## Inspiration
 
- * [Golden Files — Why you should use them](http://bit.ly/2JikzYp)
+ * [Golden Files—Why you should use them](http://bit.ly/2JikzYp)
  * [Testing with golden files in Go](http://bit.ly/2TFjdvC)
  * [Go advanced testing tips & tricks](https://bit.ly/2Cpi28Q)
 
