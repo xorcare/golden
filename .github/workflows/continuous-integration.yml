@@ -21,7 +21,6 @@ jobs:
         - '1.11'
         os:
         - 'ubuntu-18.04'
-        - 'macos-10.15'
     runs-on: ${{ matrix.os }}
     steps:
     - name: Set up Go ${{ matrix.go }}
@@ -59,7 +58,6 @@ jobs:
         - '1.8'
         os:
         - 'ubuntu-18.04'
-        - 'macos-10.15'
     runs-on: ${{ matrix.os }}
     steps:
     - name: Set up Go ${{ matrix.go }}
