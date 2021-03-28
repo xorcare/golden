@@ -1,9 +1,5 @@
 # Based on https://git.io/fjkGc
 
-# The full path to the main package is use in the
-# imports tool to format imports correctly.
-NAMESPACE = github.com/xorcare/golden
-
 # The name of the file recommended in the standard
 # documentation go test -cover and used codecov.io
 # to check code coverage.
@@ -48,7 +44,7 @@ help: ## Print this help
 
 .PHONY: imports
 imports: tools ## Check and fix import section by import rules
-	@test -z $$(for d in $$(go list -f {{.Dir}} ./...); do goimports -e -l -local $(NAMESPACE) -w $$d/*.go; done)
+	@test -z $$(for d in $$(go list -f {{.Dir}} ./...); do goimports -e -l -local $$(go list) -w $$d/*.go; done)
 
 .PHONY: lint
 lint: tools ## Check the project with lint
