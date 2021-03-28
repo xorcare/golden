@@ -51,7 +51,7 @@ go get github.com/xorcare/golden
 
 ## License
 
-© Vasiliy Vasilyuk, 2019
+© Vasiliy Vasilyuk, 2019-2021
 
 Released under the [BSD 3-Clause License][LICENSE].
 
