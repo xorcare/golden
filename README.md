@@ -55,4 +55,4 @@ go get github.com/xorcare/golden
 
 Released under the [BSD 3-Clause License][LICENSE].
 
-[LICENSE]: https://github.com/xorcare/golden/blob/master/LICENSE.md 'BSD 3-Clause "New" or "Revised" License'
+[LICENSE]: https://github.com/xorcare/golden/blob/master/LICENSE 'BSD 3-Clause "New" or "Revised" License'
