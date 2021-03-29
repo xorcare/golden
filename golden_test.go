@@ -1294,3 +1294,30 @@ func TestJSONEq(t *testing.T) {
 		})
 	}
 }
+
+func TestTool_SetWant(t *testing.T) {
+	t.Run("Golden file should not be created if want is set manually", func(t *testing.T) {
+		tool := SetTest(&bufferTB{name: t.Name()})
+		// Flag has been set to explicitly indicate the need to update gold files.
+		tool.flag = &[]bool{true}[0]
+
+		tool.writeFile = func(name string, data []byte, mode os.FileMode) error {
+			t.Fatal("golden file should not be created if want is set manually")
+			return nil
+		}
+
+		value := []byte("any value")
+		cl := tool.SetWant(value).Equal(value)
+		assert.False(t, cl.Failed())
+	})
+	t.Run("If we specify nil we must subtract the data from the golden file", func(t *testing.T) {
+		tool := SetTest(&bufferTB{name: t.Name()})
+
+		goldenFileContent := []byte("any value")
+		tool.readFile = helperOSReadFile(t, goldenFileContent, nil)
+
+		got := []byte("any value")
+		cl := tool.SetWant(nil).Equal(got)
+		assert.False(t, cl.Failed())
+	})
+}

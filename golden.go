@@ -334,7 +334,7 @@ func (t Tool) path() (path string) {
 }
 
 func (t Tool) update(f func() []byte) {
-	if t.flag != nil && *t.flag {
+	if t.flag != nil && *t.flag && t.want == nil {
 		t.test.Logf("golden: updating file: %s", t.path())
 		t.write(f())
 	}
