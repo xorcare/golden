@@ -74,14 +74,12 @@ CDTOOLS ?= cd internal/tools &&
 tools: ## Install all needed tools, e.g. for static checks
 	@$(CDTOOLS) go install golang.org/x/lint/golint
 	@$(CDTOOLS) go install golang.org/x/tools/cmd/goimports
-	@$(CDTOOLS) go install github.com/vburenin/ifacemaker
 
 .PHONY: toolsup
 toolsup: ## Update all needed tools, e.g. for static checks
 	@$(CDTOOLS) go mod tidy
 	@$(CDTOOLS) go get golang.org/x/lint/golint@latest
 	@$(CDTOOLS) go get golang.org/x/tools/cmd/goimports@latest
-	@$(CDTOOLS) go get github.com/vburenin/ifacemaker@v1.0.0
 	@$(CDTOOLS) go mod download
 	@$(CDTOOLS) go mod verify
 	@$(MAKE) tools
