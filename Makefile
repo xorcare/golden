@@ -5,6 +5,8 @@
 # to check code coverage.
 COVER_FILE ?= coverage.out
 
+export GOLDEN_UPDATE := false
+
 # Main targets.
 .DEFAULT_GOAL := help
 
@@ -65,9 +67,10 @@ testin: ## Run integration tests
 	@go tool cover -func=$(COVER_FILE) | grep ^total
 
 .PHONY: testup
+testup: export GOLDEN_UPDATE = true
 testup: ## Run unit tests with golden files update
 	@find . -type f -name '*.golden' -exec rm -f {} \;
-	@go test `go list ./... | grep -v /vendor/` -update
+	@go test `go list ./... | grep -v /vendor/`
 
 CDTOOLS ?= cd internal/tools &&
 .PHONY: tools
