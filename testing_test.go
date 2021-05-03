@@ -17,6 +17,10 @@ type bufferTB struct {
 	name string
 }
 
+func (m bufferTB) Fatal(args ...interface{}) {
+	m.Logf(fmt.Sprint(args...))
+}
+
 func (m bufferTB) String() string {
 	return strings.Join(m.logs, "\n")
 }

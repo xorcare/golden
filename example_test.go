@@ -118,6 +118,10 @@ type T struct {
 	name string
 }
 
+func (t *T) Fatal(args ...interface{}) {
+	t.Logf(fmt.Sprint(args...))
+}
+
 func (t *T) Fail()    {}
 func (t *T) FailNow() {}
 func (t *T) Helper()  {}

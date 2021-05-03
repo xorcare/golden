@@ -6,7 +6,6 @@ package golden
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -25,6 +24,7 @@ type TestingTB interface {
 	Errorf(format string, args ...interface{})
 	Fatalf(format string, args ...interface{})
 	FailNow()
+	Fatal(args ...interface{})
 	Fail()
 }
 
@@ -95,7 +95,8 @@ func getUpdateEnv() bool {
 }
 
 func init() {
-	_golden.flag = flag.Bool("getUpdateEnv", getUpdateEnv(), "update test golden files")
+	foo := true
+	_golden.flag = &foo
 }
 
 // Assert is a tool to compare the actual value obtained in the test and

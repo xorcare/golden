@@ -1,0 +1,12 @@
+{
+	"android": {
+		"connected": 40,
+		"registered": 50
+	},
+	"aurora": {
+		"connected": 45,
+		"registered": 50
+	},
+	"connected": 8512,
+	"registered": 100
+}

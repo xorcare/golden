@@ -1,7 +1,3 @@
-// Copyright (c) 2019-2021 Vasiliy Vasilyuk. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package golden
 
 import (
@@ -15,7 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// _goldie is used for as a tool golden, but inside tests.
 var _goldie = _golden
 
 func TestMain(m *testing.M) {
@@ -876,7 +871,6 @@ func TestTool_noError(t *testing.T) {
 	}
 }
 
-// FakeStat implements os.FileInfo.
 type FakeStat struct {
 	name     string
 	contents string
@@ -885,12 +879,8 @@ type FakeStat struct {
 	isDir    bool
 }
 
-// os.FileInfo methods.
-
 func (f *FakeStat) Name() string {
-	// A bit of a cheat: we only
-	// have a basename, so that's
-	// also noError for FileInfo.
+
 	return f.name
 }
 
@@ -1125,7 +1115,7 @@ func helperOSReadFile(t testing.TB, content []byte, err error) func(string) ([]b
 	if content == nil {
 		bs = nil
 		if err == nil {
-			// The concept of working with golden files: nil == os.ErrNotExist.
+
 			err = os.ErrNotExist
 		}
 	} else {
@@ -1236,7 +1226,6 @@ func TestTool_JSONEq(t *testing.T) {
 			return nil
 		}
 		tl.mkdirAll = func(string, os.FileMode) error { return nil }
-
 		cl := tl.JSONEq(string(got))
 		cl.Fail()
 		if cl.Failed() {
