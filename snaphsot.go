@@ -15,12 +15,34 @@ type Snapshot interface {
 	Equal(t TestingTB, actual interface{})
 }
 
+// Prettier интерфейс для пользовательской реализации форматирования значения.
 type Prettier interface {
 	Prettify(t TestingTB)
 }
 
+// Replacer интерфейс для пользовательской реализации замены значения.
 type Replacer interface {
 	Replace(t TestingTB, actual interface{})
+}
+
+// FileInformer сообщает информацию о том в каком месте нужно заменить значение
+// в конструкторе снимка.
+type FileInformer interface {
+	FileLine() int
+	FilePath() string
+	FuncName() string
+}
+
+// InlineReplacer интерфейс который сообщает информацию о том в каком месте
+// нужно заменить значение в конструкторе, что позволяет сделать общий инструмент
+// для обновления значений через консольный инструмент golden.
+type InlineReplacer interface {
+	CallerInfo() FileInformer
+}
+
+// Sprinter интерфейс для собственной реализации форматирования значения в код go.
+type Sprinter interface {
+	Sprint(interface{}) string
 }
 
 func SnapshotEq(t TestingTB, expected Snapshot, actual interface{}) {
