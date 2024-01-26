@@ -48,11 +48,3 @@ go get github.com/xorcare/golden
  * [Golden Files—Why you should use them](https://medium.com/@jarifibrahim/golden-files-why-you-should-use-them-47087ec994bf)
  * [Testing with golden files in Go](https://medium.com/soon-london/testing-with-golden-files-in-go-7fccc71c43d3)
  * [Go advanced testing tips & tricks](https://medium.com/@povilasve/go-advanced-tips-tricks-a872503ac859)
-
-## License
-
-© Vasiliy Vasilyuk, 2019-2021
-
-Released under the [BSD 3-Clause License][LICENSE].
-
-[LICENSE]: https://github.com/xorcare/golden/blob/main/LICENSE 'BSD 3-Clause "New" or "Revised" License'
