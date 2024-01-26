@@ -131,8 +131,8 @@ func (t *T) Logf(format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
 	// Removed the trace, it contains line numbers and changes dynamically,
 	// it is not convenient to see in the examples.
-	re := regexp.MustCompile(`(?im)Error Trace:([\w\s:.]+)Error:`)
-	msg = re.ReplaceAllString(msg, "Error Trace:\n\tError:")
+	re := regexp.MustCompile(`(?im)^\t?Error\ Trace\:([\S\s\n]+)^\t?Error\:`)
+	msg = re.ReplaceAllString(msg, "\tError Trace:\n\tError:")
 
 	msg = strings.Replace(msg, "\t", "", -1)
 
