@@ -1,0 +1,36 @@
+name: Go
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  ci:
+    name: Static analysis and testing
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+        cache: false
+
+    - name: Check that all packages are compiling
+      run: make build
+
+    - name: Run all test
+      run: make test
+
+    - name: Installing tools
+      run: make tools
+
+    - name: Run all checks
+      run: make check
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
