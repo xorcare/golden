@@ -95,7 +95,7 @@ func getUpdateEnv() bool {
 }
 
 func init() {
-	_golden.flag = flag.Bool("getUpdateEnv", getUpdateEnv(), "update test golden files")
+	_golden.flag = flag.Bool("update", getUpdateEnv(), "update test golden files")
 }
 
 // Assert is a tool to compare the actual value obtained in the test and
